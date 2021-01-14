@@ -45,3 +45,6 @@ buck-out/
 \.buckd/
 *.keystore
 *.jks
+
+# ENV
+GoogleService-Info.plist
