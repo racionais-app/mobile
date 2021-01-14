@@ -1,6 +1,0 @@
-module Pods_racionais {
-  umbrella header "Pods-racionais-umbrella.h"
-
-  export *
-  module * { export * }
-}

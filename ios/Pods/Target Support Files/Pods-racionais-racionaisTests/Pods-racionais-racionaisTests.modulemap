@@ -1,6 +1,0 @@
-module Pods_racionais_racionaisTests {
-  umbrella header "Pods-racionais-racionaisTests-umbrella.h"
-
-  export *
-  module * { export * }
-}
