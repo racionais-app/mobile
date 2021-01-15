@@ -1,13 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from 'react-native-screens/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import { enableScreens } from 'react-native-screens';
 import auth from '@react-native-firebase/auth';
 
 import LoginView from './screens/Login';
 import HomeView from './screens/Home';
+
+enableScreens();
 
 const ROOT = {
 	OUTSIDE: 'OUTSIDE',
@@ -26,9 +30,9 @@ const LoginStack = () => (
 );
 
 // HomeStack
-const Home = createStackNavigator();
+const Home = createNativeStackNavigator();
 const HomeStack = () => (
-	<Home.Navigator>
+	<Home.Navigator screenOptions={{ headerLargeTitle: true }}>
 		<Home.Screen
 			name='HomeView'
 			component={HomeView}

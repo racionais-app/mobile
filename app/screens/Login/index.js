@@ -42,6 +42,8 @@ const LoginView = () => {
       <TextInput
         placeholder='E-mail'
         style={styles.textInput}
+        keyboardType='email-address'
+        autoCapitalize='none'
         onChangeText={setEmail}
         value={email}
       />
@@ -50,6 +52,7 @@ const LoginView = () => {
         style={styles.textInput}
         onChangeText={setPassword}
         value={password}
+        secureTextEntry
       />
       <TouchableOpacity onPress={onPress}>
         <Text>Login</Text>
