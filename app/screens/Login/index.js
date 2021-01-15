@@ -17,7 +17,11 @@ const styles = StyleSheet.create({
   textInput: {
 
   }
-})
+});
+
+const ERROR = {
+  EMAIL_ALREADY_IN_USE: 'auth/email-already-in-use'
+};
 
 const LoginView = () => {
   const [email, setEmail] = React.useState('');
@@ -27,7 +31,9 @@ const LoginView = () => {
     try {
       await auth().createUserWithEmailAndPassword(email, password);
     } catch (e) {
-      console.error(e);
+      if (e.code === ERROR.EMAIL_ALREADY_IN_USE) {
+        await auth().signInWithEmailAndPassword(email, password);
+      }
     }
   }
 
