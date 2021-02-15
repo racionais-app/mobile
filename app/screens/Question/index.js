@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Popover from 'react-native-popover-view';
+import Modal from 'react-native-modal';
+import LottieView from 'lottie-react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {
   ScrollView,
   View,
@@ -69,31 +71,54 @@ const styles = StyleSheet.create({
   }
 });
 
-const Submit = ({ onSubmit, isAccepted }) => {
-  const [showPopover, setShowPopover] = React.useState(false);
+const options = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: false
+};
+
+const wrong = require('../../core/wrong.json');
+const check = require('../../core/check.json');
+
+const Feedback = ({ feedback }) => {
+  const [isVisible, setIsVisible] = React.useState(false);
 
   React.useEffect(() => {
-    if (isAccepted) {
-      setShowPopover(true);
+    if (feedback) {
+      setIsVisible(true);
+      if (feedback !== 'acertou') {
+        ReactNativeHapticFeedback.trigger('notificationError', options);
+      }
     }
-  }, [isAccepted]);
+  }, [feedback]);
 
   return (
-    <Popover
-      isVisible={showPopover}
-      onRequestClose={() => setShowPopover(false)}
-      from={(
-        <View style={styles.submit}>
-          <TouchableOpacity style={styles.button} onPress={onSubmit}>
-            <Text style={styles.check}>Checar</Text>
-          </TouchableOpacity>
-        </View>
-      )}>
-      <View style={styles.popover}>
-        <Text style={styles.title}>Parabéns!</Text>
-        <Text style={styles.subtitle}>Você conseguiu!</Text>
+    <Modal isVisible={isVisible}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <LottieView
+          source={feedback === 'acertou' ? check : wrong}
+          autoPlay
+          loop={false}
+          style={{ height: 200, width: 200 }}
+          onAnimationFinish={() => setIsVisible(false)}
+        />
       </View>
-    </Popover>
+    </Modal>
+  );
+}
+
+const Submit = ({
+  onSubmit,
+  onNext,
+  text,
+  feedback,
+  style
+}) => {
+  return (
+    <View style={styles.submit}>
+      <TouchableOpacity style={[styles.button, style]} onPress={feedback ? onNext : onSubmit}>
+        <Text style={styles.check}>{text}</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -112,24 +137,33 @@ Question.propTypes = {
   question: PropTypes.object
 };
 
-const Answer = ({ answer, onChangeText }) => {
+const Answer = ({ answer, onChangeText, feedback }) => {
+  let style = {};
+  if (feedback === 'acertou') {
+    style = { borderColor: '#00ff00' };
+  }
+  if (feedback === 'errou') {
+    style = { borderColor: '#cc0000' };
+  }
   switch(answer.type) {
     case 'input':
       return (
         <>
           <Text>{answer.label}</Text>
           <TextInput
+            editable={!feedback}
             onChangeText={text => onChangeText(text, answer.id)}
-            style={styles.input}
+            style={[styles.input, style]}
           />
         </>
       );
   }
 };
 
-const QuestionView = () => {
+const QuestionView = ({ route, navigation }) => {
+  const itemId = route.params?.itemId ?? 0;
   const [answers, setAnswers] = React.useState({});
-  const [isAccepted, setIsAccepted] = React.useState(false);
+  const [feedback, setFeedback] = React.useState(false);
 
   const onChangeText = (text, id) => {
     const answersCopy = answers;
@@ -138,24 +172,61 @@ const QuestionView = () => {
   };
 
   const onSubmit = () => {
-    const validResponse = data.answers.filter(answer => answer.value !== answers[answer.id]).length === 0;
-    setIsAccepted(validResponse);
+    const validResponse = data[itemId].answers.filter(answer => answer.value !== answers[answer.id]).length === 0;
+    setFeedback(validResponse ? 'acertou' : 'errou');
+  }
+  
+  const onNext = () => {
+    if (data.length - 1 > itemId) {
+      navigation?.push?.('QuestionView', { itemId: itemId + 1 })
+    }
+  }
+
+  let style = {};
+  if (feedback === 'acertou') {
+    style = { backgroundColor: '#00ff00' };
+  }
+  if (feedback === 'errou') {
+    style = { backgroundColor: '#cc0000' };
+  }
+
+  let text = 'Checar';
+  if (feedback) {
+    text = 'Próximo';
+    if (data.length - 1 === itemId) {
+      text = 'Finalizar';
+      style = {};
+    }
   }
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
         <View style={styles.content}>
-          {data.question.map(question => <Question question={question} />)}
+          {data[itemId].question.map(question => <Question question={question} />)}
           <Image
-            source={{ uri: data.image }}
+            source={{ uri: data[itemId].image }}
             style={{ height: 250, width: 250 }}
             resizeMode='contain'
           />
-          {data.answers.map(answer => <Answer answer={answer} answers={answers} onChangeText={onChangeText} />)}
+          {data[itemId].answers.map(answer => (
+            <Answer
+              answer={answer}
+              answers={answers}
+              onChangeText={onChangeText}
+              feedback={feedback}
+            />
+          ))}
         </View>
       </ScrollView>
-      <Submit onSubmit={onSubmit} isAccepted={isAccepted} />
+      <Submit
+        onSubmit={onSubmit}
+        onNext={onNext}
+        feedback={feedback}
+        text={text}
+        style={style}
+      />
+      <Feedback feedback={feedback} />
     </View>
   );
 };
