@@ -8,8 +8,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import auth from '@react-native-firebase/auth';
 
-import LoginView from './screens/Login';
 import HomeView from './screens/Home';
+import LoginView from './screens/Login';
+import QuestionView from './screens/Question';
 
 enableScreens();
 
@@ -38,6 +39,24 @@ const HomeStack = () => (
 			component={HomeView}
 		/>
 	</Home.Navigator>
+);
+
+// QuestionStack
+const Question = createStackNavigator();
+const QuestionStack = () => (
+	<Question.Navigator
+		screenOptions={{
+			headerStyle: {
+				backgroundColor: '#122b61'
+			},
+			headerTintColor: 'white'
+		}}
+	>
+		<Question.Screen
+			name='QuestionView'
+			component={QuestionView}
+		/>
+	</Question.Navigator>
 );
 
 // InsideTab
@@ -69,11 +88,12 @@ const Root = ({ root, login, logout }) => {
 
 	return (
 		<NavigationContainer>
-			{
+			{/* {
 				root === ROOT.OUTSIDE
 					? <LoginStack />
 					: <InsideTab />
-			}
+			} */}
+			<QuestionStack />
 		</NavigationContainer>
 	);
 };
