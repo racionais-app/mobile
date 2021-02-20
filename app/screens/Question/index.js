@@ -1,18 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import Modal from 'react-native-modal';
-import LottieView from 'lottie-react-native';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Image
-} from 'react-native';
-import data from '../../core/data';
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
+import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
+import KeyboardSpacer from 'react-native-keyboard-spacer';
+import isEqual from 'lodash/isEqual';
+
+import Separator from './Components/Separator';
+import Element from './Components/Element';
+import Footer from './Components/Footer';
 
 const styles = StyleSheet.create({
   container: {
@@ -21,214 +15,53 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
-    backgroundColor: 'white'
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: 'gray',
-    marginBottom: 16,
-    padding: 8,
-    height: 36
-  },
-  submit: {
-    width: '100%',
-    height: 64,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    shadowOffset: {
-      width: 0,
-      height: -1,
-    },
-    shadowColor: 'gray',
-    shadowOpacity: 0.5,
-    elevation: 1
-  },
-  button: {
-    backgroundColor: '#122b61',
-    padding: 8,
-    paddingHorizontal: 32,
-    position: 'absolute',
-    right: 16,
-    borderRadius: 4
-  },
-  check: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: 'white'
-  },
-  popover: {
     padding: 16
   },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: 'normal'
+  contentContainerStyle: {
+    paddingBottom: 64
   }
 });
 
-const options = {
-  enableVibrateFallback: true,
-  ignoreAndroidSystemSettings: false
-};
+const question = [
+  { id: 1, type: 'text', text: 'Olá eu sou um **texto**.' },
+  { id: 2, type: 'text', text: 'E eu um *sub-texto*.' },
+  { id: 3, type: 'image', url: 'https://i.imgur.com/FhwD6Ct.png', size: 250 },
+  { id: 4, type: 'select', label: 'Escolha uma', options: [{ id: 1, text: 'Opção 1' }, { id: 2, text: 'Opção 2' }], answer: [2] },
+  { id: 5, type: 'input', label: 'Fração', data: { id: 1, defaultValue: 'DJ'}, answer: 'djorkaeff' },
+  { id: 6, type: 'text', text: 'E eu um **outro** sub-texto.' },
+  { id: 7, type: 'multi-select', label: 'Escolha múltiplas', options: [{ id: 1, text: 'Opção 1' }, { id: 2, text: 'Opção 2' }], answer: [1, 2] }
+];
 
-const wrong = require('../../core/wrong.json');
-const check = require('../../core/check.json');
+const QuestionView = () => {
+  const [data, setData] = useState({});
 
-const Feedback = ({ feedback }) => {
-  const [isVisible, setIsVisible] = React.useState(false);
-
-  React.useEffect(() => {
-    if (feedback) {
-      setIsVisible(true);
-      if (feedback !== 'acertou') {
-        ReactNativeHapticFeedback.trigger('notificationError', options);
-      }
-    }
-  }, [feedback]);
-
-  return (
-    <Modal isVisible={isVisible}>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <LottieView
-          source={feedback === 'acertou' ? check : wrong}
-          autoPlay
-          loop={false}
-          style={{ height: 200, width: 200 }}
-          onAnimationFinish={() => setIsVisible(false)}
-        />
-      </View>
-    </Modal>
-  );
-}
-
-const Submit = ({
-  onSubmit,
-  onNext,
-  text,
-  feedback,
-  style
-}) => {
-  return (
-    <View style={styles.submit}>
-      <TouchableOpacity style={[styles.button, style]} onPress={feedback ? onNext : onSubmit}>
-        <Text style={styles.check}>{text}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-const Question = ({ question }) => (
-  <Text
-    style={{
-      marginBottom: 16,
-      fontSize: question.format.size,
-      fontWeight: question.format.weight
-    }}
-  >
-    {question.text}
-  </Text>
-);
-Question.propTypes = {
-  question: PropTypes.object
-};
-
-const Answer = ({ answer, onChangeText, feedback }) => {
-  let style = {};
-  if (feedback === 'acertou') {
-    style = { borderColor: '#00ff00' };
+  const onChange = (itemId, value) => {
+    setData({ ...data, [itemId]: value });
   }
-  if (feedback === 'errou') {
-    style = { borderColor: '#cc0000' };
-  }
-  switch(answer.type) {
-    case 'input':
-      return (
-        <>
-          <Text>{answer.label}</Text>
-          <TextInput
-            editable={!feedback}
-            onChangeText={text => onChangeText(text, answer.id)}
-            style={[styles.input, style]}
-          />
-        </>
-      );
-  }
-};
-
-const QuestionView = ({ route, navigation }) => {
-  const itemId = route.params?.itemId ?? 0;
-  const [answers, setAnswers] = React.useState({});
-  const [feedback, setFeedback] = React.useState(false);
-
-  const onChangeText = (text, id) => {
-    const answersCopy = answers;
-    answersCopy[id] = text;
-    setAnswers(answersCopy);
-  };
 
   const onSubmit = () => {
-    const validResponse = data[itemId].answers.filter(answer => answer.value !== answers[answer.id]).length === 0;
-    setFeedback(validResponse ? 'acertou' : 'errou');
-  }
-  
-  const onNext = () => {
-    if (data.length - 1 > itemId) {
-      navigation?.push?.('QuestionView', { itemId: itemId + 1 })
-    }
-  }
-
-  let style = {};
-  if (feedback === 'acertou') {
-    style = { backgroundColor: '#00ff00' };
-  }
-  if (feedback === 'errou') {
-    style = { backgroundColor: '#cc0000' };
-  }
-
-  let text = 'Checar';
-  if (feedback) {
-    text = 'Próximo';
-    if (data.length - 1 === itemId) {
-      text = 'Finalizar';
-      style = {};
-    }
+    const answers = question.filter(item => item.answer);
+    const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
+    console.warn(accepted ? 'Acertou' : 'Errou');
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
-        <View style={styles.content}>
-          {data[itemId].question.map(question => <Question question={question} />)}
-          <Image
-            source={{ uri: data[itemId].image }}
-            style={{ height: 250, width: 250 }}
-            resizeMode='contain'
-          />
-          {data[itemId].answers.map(answer => (
-            <Answer
-              answer={answer}
-              answers={answers}
-              onChangeText={onChangeText}
-              feedback={feedback}
-            />
-          ))}
-        </View>
-      </ScrollView>
-      <Submit
-        onSubmit={onSubmit}
-        onNext={onNext}
-        feedback={feedback}
-        text={text}
-        style={style}
+    <SafeAreaView style={styles.container}>
+      <KeyboardAwareFlatList
+        data={question}
+        renderItem={({ item }) => <Element element={item} onChange={onChange} />}
+        ItemSeparatorComponent={() => <Separator />}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={styles.contentContainerStyle}
+        style={styles.content}
+        enableAutomaticScroll={false}
       />
-      <Feedback feedback={feedback} />
-    </View>
+      <Footer
+        onSubmit={onSubmit}
+      />
+      <KeyboardSpacer />
+    </SafeAreaView>
   );
-};
+}
 
 export default QuestionView;

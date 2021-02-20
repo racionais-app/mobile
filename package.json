@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@react-native-community/masked-view": "^0.1.10",
@@ -16,12 +17,17 @@
     "@react-navigation/bottom-tabs": "^5.11.3",
     "@react-navigation/native": "^5.9.0",
     "@react-navigation/stack": "^5.13.0",
+    "lodash": "^4.17.20",
     "lottie-ios": "3.1.8",
     "lottie-react-native": "^3.5.0",
+    "patch-package": "^6.2.2",
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-gesture-handler": "^1.9.0",
     "react-native-haptic-feedback": "^1.11.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.3",
+    "react-native-keyboard-spacer": "^0.4.1",
+    "react-native-markdown-display": "^7.0.0-alpha.2",
     "react-native-modal": "^11.6.1",
     "react-native-popover-view": "^3.1.1",
     "react-native-reanimated": "^1.13.2",
