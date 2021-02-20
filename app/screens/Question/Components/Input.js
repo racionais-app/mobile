@@ -5,6 +5,7 @@ import Markdown from './Markdown';
 
 const styles = StyleSheet.create({
   textInput: {
+    marginTop: 8,
     padding: 8,
     borderWidth: 1,
     borderColor: 'gray',

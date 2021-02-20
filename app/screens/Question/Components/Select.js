@@ -9,6 +9,9 @@ import {
 import Markdown from './Markdown';
 
 const styles = StyleSheet.create({
+  list: {
+    marginTop: 8
+  },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -75,17 +78,20 @@ const Select = ({
   }, [selection]);
 
   return (
-    <FlatList
-      data={options}
-      renderItem={({ item }) => {
-        const isSelected = selection.includes(item.id);
-        return <Option option={item} onChange={onChange} isSelected={isSelected} />
-      }}
-      keyExtractor={item => item.id.toString()}
-      ListHeaderComponent={() => <Markdown>{element.label}</Markdown>}
-      ItemSeparatorComponent={() => <Separator />}
-      scrollEnabled={false}
-    />
+    <>
+      <Markdown>{element.label}</Markdown>
+      <FlatList
+        data={options}
+        renderItem={({ item }) => {
+          const isSelected = selection.includes(item.id);
+          return <Option option={item} onChange={onChange} isSelected={isSelected} />
+        }}
+        keyExtractor={item => item.id.toString()}
+        ItemSeparatorComponent={() => <Separator />}
+        style={styles.list}
+        scrollEnabled={false}
+      />
+    </>
   );
 }
 

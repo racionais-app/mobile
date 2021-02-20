@@ -27,7 +27,7 @@ const question = [
   { id: 2, type: 'text', text: 'E eu um *sub-texto*.' },
   { id: 3, type: 'image', url: 'https://i.imgur.com/FhwD6Ct.png', size: 250 },
   { id: 4, type: 'select', label: 'Escolha uma', options: [{ id: 1, text: 'Opção 1' }, { id: 2, text: 'Opção 2' }], answer: [2] },
-  { id: 5, type: 'input', label: 'Fração', data: { id: 1, defaultValue: 'DJ'}, answer: 'djorkaeff' },
+  { id: 5, type: 'input', label: '**Fração**', data: { id: 1, defaultValue: 'DJ'}, answer: 'djorkaeff' },
   { id: 6, type: 'text', text: 'E eu um **outro** sub-texto.' },
   { id: 7, type: 'multi-select', label: 'Escolha múltiplas', options: [{ id: 1, text: 'Opção 1' }, { id: 2, text: 'Opção 2' }], answer: [1, 2] }
 ];
