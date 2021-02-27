@@ -1,37 +1,90 @@
-import React from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import React, {
+  useState,
+  useEffect
+} from 'react';
+import {
+  Text,
+  FlatList,
+  StyleSheet
+} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import auth from '@react-native-firebase/auth';
+import { useNavigation } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    padding: 16
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#122b61',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    padding: 16
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white'
   }
-})
+});
 
-const Home = () => {
+const Module = ({ item }) => {
+  const navigation = useNavigation();
 
-  const onPress = async() => {
-    try {
-      await auth().signOut()
-    } catch (e) {
-      console.error(e);
+  const onPress = () => {
+    if (item.questions.length > 0) {
+      navigation.navigate('QuestionStack', {
+        screen: 'QuestionView',
+        params: {
+          questions: item.questions
+        }
+      });
     }
-  };
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <TouchableOpacity onPress={onPress}>
-          <Text>Logout</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+    <TouchableOpacity onPress={onPress} style={styles.button}>
+      <Text style={styles.text}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const Home = () => {
+  const [modules, setModules] = useState([]);
+
+  useEffect(() => {
+    (async() => {
+      try {
+        const remoteModules = await firestore()
+          .collection('modules')
+          .get();
+
+        const data = remoteModules
+          .docs
+          .map(doc => doc.data());
+
+        setModules(data);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
+
+  return (
+    <FlatList
+      data={modules}
+      renderItem={({ item }) => <Module item={item} />}
+      keyExtractor={item => item.name}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 

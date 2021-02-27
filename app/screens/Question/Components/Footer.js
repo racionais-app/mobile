@@ -34,10 +34,10 @@ const styles = StyleSheet.create({
   }
 });
 
-const Footer = ({ onSubmit }) => (
+const Footer = ({ text, onSubmit }) => (
   <View style={styles.submit}>
     <TouchableOpacity style={styles.button} onPress={onSubmit}>
-      <Text style={styles.text}>Continuar</Text>
+      <Text style={styles.text}>{text}</Text>
     </TouchableOpacity>
   </View>
 );
