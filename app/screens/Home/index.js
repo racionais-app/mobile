@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 
 import Loading from '../../containers/Loading';
+import StarBalance from '../../containers/StarBalance';
 
 const styles = StyleSheet.create({
   container: {
@@ -59,7 +60,7 @@ const Module = ({ item }) => {
   );
 };
 
-const Home = () => {
+const Home = ({ navigation }) => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -85,6 +86,12 @@ const Home = () => {
       }
     })();
   }, []);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <StarBalance />
+    });
+  }, [navigation]);
 
   return (
     <>

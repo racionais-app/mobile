@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
+import firestore from '@react-native-firebase/firestore';
 import LottieView from 'lottie-react-native';
 import Modal from 'react-native-modal';
 import isEqual from 'lodash/isEqual';
@@ -14,6 +15,7 @@ import {
   Item,
   HeaderButtons
 } from '../../containers/HeaderButton';
+import StarBalance from '../../containers/StarBalance';
 
 const styles = StyleSheet.create({
   container: {
@@ -41,10 +43,38 @@ const QuestionView = ({ navigation, route }) => {
     setData({ ...data, [itemId]: value });
   }
 
-  const onSubmit = () => {
+  const onUserConfirm = (userId, value) => {
+    const userReference = firestore().doc(`users/${userId}`);
+  
+    return firestore().runTransaction(async transaction => {
+      const userSnapshot = await transaction.get(userReference);
+  
+      if (!userSnapshot.exists) {
+        throw 'User does not exist!';
+      }
+
+      let newValue = userSnapshot.data().stars + value;
+      if (newValue < 0) {
+        newValue = 0;
+      }
+  
+      await transaction.update(userReference, {
+        stars: newValue
+      });
+    });
+  }
+
+  const onSubmit = async() => {
     const answers = question.filter(item => item.answer);
     const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
+    console.log(answers);
     setVisible(true);
+
+    try {
+      await onUserConfirm('CMEHDWOQeCbiCozYSewT', accepted ? 1 : -1);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   const animationCallback = () => {
@@ -68,6 +98,7 @@ const QuestionView = ({ navigation, route }) => {
           />
         </HeaderButtons>
       ),
+      headerRight: () => <StarBalance style={{ marginHorizontal: 16 }} />
     });
   }, [navigation]);
 

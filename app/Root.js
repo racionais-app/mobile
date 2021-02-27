@@ -38,6 +38,7 @@ const QuestionStack = () => (
 		<Question.Screen
 			name='QuestionView'
 			component={QuestionView}
+			options={{ gestureEnabled: false }}
 		/>
 	</Question.Navigator>
 );
