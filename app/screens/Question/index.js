@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
+import LottieView from 'lottie-react-native';
+import Modal from 'react-native-modal';
 import isEqual from 'lodash/isEqual';
 
 import Separator from './Components/Separator';
@@ -28,10 +30,12 @@ const styles = StyleSheet.create({
 });
 
 const QuestionView = ({ navigation, route }) => {
+  const index = route.params?.index ?? 0;
   const questions = route.params?.questions;
-  const question = questions[0].items;
+  const question = questions[index].items;
 
   const [data, setData] = useState({});
+  const [visible, setVisible] = useState(false);
 
   const onChange = (itemId, value) => {
     setData({ ...data, [itemId]: value });
@@ -40,15 +44,16 @@ const QuestionView = ({ navigation, route }) => {
   const onSubmit = () => {
     const answers = question.filter(item => item.answer);
     const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
-    console.warn(accepted ? 'Acertou' : 'Errou');
-    setTimeout(() => {
-      questions.pop();
-      if (questions.length) {
-        navigation.push('QuestionView', { questions });
-      } else {
-        navigation.navigate('HomeView');
-      }
-    }, 1000);
+    setVisible(true);
+  }
+
+  const animationCallback = () => {
+    setVisible(false);
+    if (index < questions.length - 1) {
+      navigation.push('QuestionView', { questions, index: index + 1 });
+    } else {
+      navigation.navigate('HomeView');
+    }
   }
 
   React.useLayoutEffect(() => {
@@ -78,10 +83,24 @@ const QuestionView = ({ navigation, route }) => {
         enableAutomaticScroll={false}
       />
       <Footer
-        text={questions.length === 1 ? 'Finalizar' : 'Continuar'}
+        text={index === questions.length - 1 ? 'Finalizar' : 'Continuar'}
         onSubmit={onSubmit}
       />
       <KeyboardSpacer />
+      <Modal
+        isVisible={visible}
+        hideModalContentWhileAnimating
+        animationInTiming={0}
+        animationOutTiming={0}
+      >
+        <LottieView
+          source={require('./../../core/check.json')}
+          autoPlay
+          loop={false}
+          style={styles.animation}
+          onAnimationFinish={animationCallback}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }

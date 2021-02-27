@@ -11,6 +11,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 
+import Loading from '../../containers/Loading';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -59,8 +61,10 @@ const Module = ({ item }) => {
 
 const Home = () => {
   const [modules, setModules] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     (async() => {
       try {
         const remoteModules = await firestore()
@@ -71,20 +75,29 @@ const Home = () => {
           .docs
           .map(doc => doc.data());
 
-        setModules(data);
+        setTimeout(() => {
+          setLoading(false);
+          setModules(data);
+        }, 1000);
       } catch (e) {
+        setLoading(false);
         console.error(e);
       }
     })();
   }, []);
 
   return (
-    <FlatList
-      data={modules}
-      renderItem={({ item }) => <Module item={item} />}
-      keyExtractor={item => item.name}
-      contentContainerStyle={styles.container}
-    />
+    <>
+      <FlatList
+        data={modules}
+        renderItem={({ item }) => <Module item={item} />}
+        keyExtractor={item => item.name}
+        contentContainerStyle={styles.container}
+      />
+      <Loading
+        visible={loading}
+      />
+    </>
   );
 };
 
