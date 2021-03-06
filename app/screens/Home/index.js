@@ -43,14 +43,12 @@ const Module = ({ item }) => {
   const navigation = useNavigation();
 
   const onPress = () => {
-    if (item.questions.length > 0) {
-      navigation.navigate('QuestionStack', {
-        screen: 'QuestionView',
-        params: {
-          questions: item.questions
-        }
-      });
-    }
+    navigation.navigate('QuestionStack', {
+      screen: 'QuestionView',
+      params: {
+        moduleId: item.id
+      }
+    });
   }
 
   return (
@@ -74,7 +72,7 @@ const Home = ({ navigation }) => {
 
         const data = remoteModules
           .docs
-          .map(doc => doc.data());
+          .map(doc => ({ id: doc.id, ...doc.data() }));
 
         setTimeout(() => {
           setLoading(false);

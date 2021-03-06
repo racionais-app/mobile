@@ -33,11 +33,29 @@ const styles = StyleSheet.create({
 
 const QuestionView = ({ navigation, route }) => {
   const index = route.params?.index ?? 0;
-  const questions = route.params?.questions;
-  const question = questions[index].items;
+  const moduleId = route.params?.moduleId;
+  const [questions, setQuestions] = useState([]);
+  const [question, setQuestion] = useState([]);
 
   const [data, setData] = useState({});
   const [visible, setVisible] = useState(false);
+
+  React.useEffect(() => {
+    (async() => {
+      const items = await firestore()
+          .collection('modules')
+          .doc(moduleId)
+          .collection('questions')
+          .get();
+      setQuestions(items.docs.map(doc => doc.data()));
+    })();
+  }, []);
+
+  React.useEffect(() => {
+    if (questions?.length) {
+      setQuestion(questions[index].items);
+    }
+  }, [questions]);
 
   const onChange = (itemId, value) => {
     setData({ ...data, [itemId]: value });
@@ -67,7 +85,6 @@ const QuestionView = ({ navigation, route }) => {
   const onSubmit = async() => {
     const answers = question.filter(item => item.answer);
     const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
-    console.log(answers);
     setVisible(true);
 
     try {

@@ -4,7 +4,7 @@ import Markdown from './Markdown';
 
 const Text = ({ element }) => (
   <Markdown>
-    {element.text}
+    {element.text.toString()}
   </Markdown>
 );
 
