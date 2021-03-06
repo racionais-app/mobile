@@ -21,8 +21,8 @@ const Input = ({ element, onChange }) => (
     <TextInput
       style={styles.textInput}
       onChangeText={text => onChange(element.id, text)}
-      defaultValue={element.data?.defaultValue ?? ''}
-      placeholder={element.data?.placeholder ?? ''}
+      defaultValue={element.defaultValue ?? ''}
+      placeholder={element.placeholder ?? ''}
       placeholderTextColor='gray'
     />
   </>
