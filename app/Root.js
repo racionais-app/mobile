@@ -11,6 +11,7 @@ import auth from '@react-native-firebase/auth';
 import HomeView from './screens/Home';
 import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
+import ExplanationView from './screens/Explanation';
 
 enableScreens();
 
@@ -59,6 +60,24 @@ const QuestionStack = () => (
 	</Question.Navigator>
 );
 
+// ExplanationStack
+const Explanation = createStackNavigator();
+const ExplanationStack = () => (
+	<Explanation.Navigator
+		screenOptions={{
+			headerStyle: {
+				backgroundColor: '#122b61'
+			},
+			headerTintColor: 'white'
+		}}
+	>
+		<Explanation.Screen
+			name='ExplanationView'
+			component={ExplanationView}
+		/>
+	</Explanation.Navigator>
+);
+
 // InsideTab
 const Inside = createBottomTabNavigator();
 const InsideTab = () => (
@@ -93,7 +112,7 @@ const Root = ({ root, login, logout }) => {
 					? <LoginStack />
 					: <InsideTab />
 			} */}
-			<QuestionStack />
+			<ExplanationStack />
 		</NavigationContainer>
 	);
 };
