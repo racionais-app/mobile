@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
+import DeviceInfo from 'react-native-device-info';
 
 const styles = StyleSheet.create({
   container: {
@@ -22,7 +23,7 @@ const StarBalance = ({ style }) => {
   React.useEffect(() => {
     const subscriber = firestore()
       .collection('users')
-      .doc('CMEHDWOQeCbiCozYSewT')
+      .doc(DeviceInfo.getUniqueId())
       .onSnapshot(documentSnapshot => {
         const data = documentSnapshot.data();
         setStars(data.stars ?? 0);

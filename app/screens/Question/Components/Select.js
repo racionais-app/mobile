@@ -86,7 +86,7 @@ const Select = ({
           const isSelected = selection.includes(item.id);
           return <Option option={item} onChange={onChange} isSelected={isSelected} />
         }}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.id?.toString?.()}
         ItemSeparatorComponent={() => <Separator />}
         style={styles.list}
         scrollEnabled={false}

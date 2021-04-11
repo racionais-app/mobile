@@ -6,11 +6,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from 'react-native-screens/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
-import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeView from './screens/Home';
 import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
+import SettingsView from './screens/Settings';
 
 enableScreens();
 
@@ -46,7 +47,7 @@ const QuestionStack = () => (
 // LoginStack
 const Login = createStackNavigator();
 const LoginStack = () => (
-	<Login.Navigator>
+	<Login.Navigator screenOptions={{ headerShown: false }}>
 		<Login.Screen
 			name='LoginView'
 			component={LoginView}
@@ -57,17 +58,23 @@ const LoginStack = () => (
 // HomeStack
 const Home = createNativeStackNavigator();
 const HomeStack = () => (
-	<Home.Navigator screenOptions={homeScreenOptions} mode='modal'>
+	<Home.Navigator screenOptions={homeScreenOptions}>
 		<Home.Screen
 			name='HomeView'
 			component={HomeView}
 		/>
-		<Home.Screen
-			name='QuestionStack'
-			component={QuestionStack}
-			options={{ headerShown: false }}
-		/>
 	</Home.Navigator>
+);
+
+// SettingsStack
+const Settings = createStackNavigator();
+const SettingsStack = () => (
+	<Settings.Navigator screenOptions={homeScreenOptions}>
+		<Settings.Screen
+			name='SettingsView'
+			component={SettingsView}
+		/>
+	</Settings.Navigator>
 );
 
 // InsideTab
@@ -80,31 +87,44 @@ const InsideTab = () => (
 		/>
 		<Inside.Screen
 			name='Settings'
-			component={HomeStack}
+			component={SettingsStack}
 		/>
 	</Inside.Navigator>
 );
 
-const Root = ({ root, login, logout }) => {
+// InsideTab
+const App = createStackNavigator();
+const AppStack = () => (
+	<App.Navigator mode='modal' screenOptions={{ headerShown: false }}>
+		<App.Screen
+			name='Inside'
+			component={InsideTab}
+		/>
+		<App.Screen
+			name='QuestionStack'
+			component={QuestionStack}
+		/>
+	</App.Navigator>
+);
+
+const Root = ({ root, login }) => {
 
 	React.useEffect(() => {
-		auth().onAuthStateChanged((user) => {
-			if (user) {
+		(async() => {
+			const auth = await AsyncStorage.getItem('authentication');
+			if (auth) {
 				login();
-			} else {
-				logout();
 			}
-		});
+		})();
 	}, []);
 
 	return (
 		<NavigationContainer>
-			{/* {
+			{
 				root === ROOT.OUTSIDE
 					? <LoginStack />
-					: <InsideTab />
-			} */}
-			<HomeStack />
+					: <AppStack />
+			}
 		</NavigationContainer>
 	);
 };

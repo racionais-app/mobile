@@ -125,7 +125,7 @@ const QuestionView = ({ navigation, route }) => {
         data={question}
         renderItem={({ item }) => <Element element={item} onChange={onChange} />}
         ItemSeparatorComponent={() => <Separator />}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.id?.toString?.()}
         contentContainerStyle={styles.contentContainerStyle}
         style={styles.content}
         enableAutomaticScroll={false}
