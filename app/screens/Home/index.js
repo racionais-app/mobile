@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 import {
   Text,
+  View,
   FlatList,
   StyleSheet
 } from 'react-native';
@@ -12,15 +13,21 @@ import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 
 import Loading from '../../containers/Loading';
-import StarBalance from '../../containers/StarBalance';
 import { connect } from 'react-redux';
 import Header from './Header';
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#F0F0F5'
+  },
   container: {
     flex: 1,
+    marginTop: 16,
     padding: 16,
-    backgroundColor: '#F0F0F5'
+    borderTopWidth: 2,
+    borderColor: '#E6E6E9',
+    backgroundColor: '#FFF'
   },
   content: {
     flex: 1,
@@ -95,7 +102,7 @@ const Home = ({ navigation, user }) => {
   }, [navigation, user]);
 
   return (
-    <>
+    <View style={styles.screen}>
       <Header />
       <FlatList
         data={modules}
@@ -106,7 +113,7 @@ const Home = ({ navigation, user }) => {
       <Loading
         visible={loading}
       />
-    </>
+    </View>
   );
 };
 

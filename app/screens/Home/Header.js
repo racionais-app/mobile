@@ -12,7 +12,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderColor: '#E6E6E9',
     flexDirection: 'row',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
+    backgroundColor: '#fff'
   }
 });
 
