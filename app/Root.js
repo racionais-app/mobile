@@ -2,28 +2,52 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from 'react-native-screens/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
-import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeView from './screens/Home';
 import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
-import ExplanationView from './screens/Explanation';
+import ModuleView from './screens/Module';
+// import SettingsView from './screens/Settings';
 
 enableScreens();
 
 const ROOT = {
 	OUTSIDE: 'OUTSIDE',
 	INSIDE: 'INSIDE'
-}
+};
+
+const defaultScreenOptions = {
+	headerStyle: {
+		backgroundColor: '#122b61'
+	},
+	headerTintColor: 'white'
+};
+
+const homeScreenOptions = {
+	...defaultScreenOptions,
+	headerLargeTitle: true
+};
+
+// QuestionStack
+const Question = createStackNavigator();
+const QuestionStack = () => (
+	<Question.Navigator screenOptions={defaultScreenOptions}>
+		<Question.Screen
+			name='QuestionView'
+			component={QuestionView}
+			options={{ gestureEnabled: false }}
+		/>
+	</Question.Navigator>
+);
 
 // LoginStack
 const Login = createStackNavigator();
 const LoginStack = () => (
-	<Login.Navigator>
+	<Login.Navigator screenOptions={{ headerShown: false }}>
 		<Login.Screen
 			name='LoginView'
 			component={LoginView}
@@ -34,85 +58,72 @@ const LoginStack = () => (
 // HomeStack
 const Home = createNativeStackNavigator();
 const HomeStack = () => (
-	<Home.Navigator screenOptions={{ headerLargeTitle: true }}>
+	<Home.Navigator screenOptions={homeScreenOptions}>
 		<Home.Screen
 			name='HomeView'
 			component={HomeView}
 		/>
+		<Home.Screen
+			name='ModuleView'
+			component={ModuleView}
+			options={{
+				headerLargeTitle: false,
+				headerBackTitle: ''
+			}}
+		/>
 	</Home.Navigator>
 );
 
-// QuestionStack
-const Question = createStackNavigator();
-const QuestionStack = () => (
-	<Question.Navigator
-		screenOptions={{
-			headerStyle: {
-				backgroundColor: '#122b61'
-			},
-			headerTintColor: 'white'
-		}}
-	>
-		<Question.Screen
-			name='QuestionView'
-			component={QuestionView}
+// SettingsStack
+const Settings = createStackNavigator();
+const SettingsStack = () => (
+	<Settings.Navigator screenOptions={homeScreenOptions}>
+		<Settings.Screen
+			name='SettingsView'
+			component={SettingsView}
 		/>
-	</Question.Navigator>
-);
-
-// ExplanationStack
-const Explanation = createStackNavigator();
-const ExplanationStack = () => (
-	<Explanation.Navigator
-		screenOptions={{
-			headerStyle: {
-				backgroundColor: '#122b61'
-			},
-			headerTintColor: 'white'
-		}}
-	>
-		<Explanation.Screen
-			name='ExplanationView'
-			component={ExplanationView}
-		/>
-	</Explanation.Navigator>
+	</Settings.Navigator>
 );
 
 // InsideTab
-const Inside = createBottomTabNavigator();
-const InsideTab = () => (
-	<Inside.Navigator>
-		<Inside.Screen
+const App = createNativeStackNavigator();
+const AppStack = () => (
+	<App.Navigator mode='modal' screenOptions={{ headerShown: false }}>
+		<App.Screen
 			name='Home'
 			component={HomeStack}
 		/>
-		<Inside.Screen
-			name='Settings'
-			component={HomeStack}
+		<App.Screen
+			name='QuestionView'
+			component={QuestionView}
+			options={{
+				gestureEnabled: false,
+				headerShown: true,
+				headerBackTitleVisible: false,
+				...defaultScreenOptions
+			}}
 		/>
-	</Inside.Navigator>
+	</App.Navigator>
 );
 
-const Root = ({ root, login, logout }) => {
+const Root = ({ root, login }) => {
 
 	React.useEffect(() => {
-		auth().onAuthStateChanged((user) => {
-			if (user) {
-				login();
-			} else {
-				logout();
+		(async() => {
+			const name = await AsyncStorage.getItem('authentication');
+			if (name) {
+				login({ name });
 			}
-		});
+		})();
 	}, []);
 
 	return (
 		<NavigationContainer>
-			{/* {
+			{
 				root === ROOT.OUTSIDE
 					? <LoginStack />
-					: <InsideTab />
-			} */}
-			<ExplanationStack />
+					: <AppStack />
+			}
 		</NavigationContainer>
 	);
 };
@@ -124,7 +135,7 @@ const mapStateToProps = (state) => ({
 	root: state.app.root
 });
 const mapDispatchToProps = (dispatch) => ({
-	login: () => dispatch({ type: 'LOGIN' }),
+	login: (user) => dispatch({ type: 'LOGIN', payload: user }),
 	logout: () => dispatch({ type: 'LOGOUT' }),
 });
 

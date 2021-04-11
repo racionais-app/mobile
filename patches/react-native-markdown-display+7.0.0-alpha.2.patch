@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-markdown-display/src/lib/styles.js b/node_modules/react-native-markdown-display/src/lib/styles.js
+index e1b5e39..2302a6c 100644
+--- a/node_modules/react-native-markdown-display/src/lib/styles.js
++++ b/node_modules/react-native-markdown-display/src/lib/styles.js
+@@ -171,8 +171,6 @@ export const styles = {
+   text: {},
+   textgroup: {},
+   paragraph: {
+-    marginTop: 10,
+-    marginBottom: 10,
+     flexWrap: 'wrap',
+     flexDirection: 'row',
+     alignItems: 'flex-start',

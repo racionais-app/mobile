@@ -1,18 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import Modal from 'react-native-modal';
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
+import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
+import KeyboardSpacer from 'react-native-keyboard-spacer';
+import firestore from '@react-native-firebase/firestore';
 import LottieView from 'lottie-react-native';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Image
-} from 'react-native';
-import data from '../../core/data';
+import Modal from 'react-native-modal';
+import DeviceInfo from 'react-native-device-info';
+import isEqual from 'lodash/isEqual';
+
+import Separator from './Components/Separator';
+import Element from './Components/Element';
+import Footer from './Components/Footer';
 
 const styles = StyleSheet.create({
   container: {
@@ -21,214 +19,154 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
-    backgroundColor: 'white'
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: 'gray',
-    marginBottom: 16,
-    padding: 8,
-    height: 36
-  },
-  submit: {
-    width: '100%',
-    height: 64,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    shadowOffset: {
-      width: 0,
-      height: -1,
-    },
-    shadowColor: 'gray',
-    shadowOpacity: 0.5,
-    elevation: 1
-  },
-  button: {
-    backgroundColor: '#122b61',
-    padding: 8,
-    paddingHorizontal: 32,
-    position: 'absolute',
-    right: 16,
-    borderRadius: 4
-  },
-  check: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: 'white'
-  },
-  popover: {
     padding: 16
   },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: 'normal'
+  contentContainerStyle: {
+    paddingBottom: 64
   }
 });
 
-const options = {
-  enableVibrateFallback: true,
-  ignoreAndroidSystemSettings: false
-};
+const datesAreOnSameDay = (first, second) =>
+  first.getFullYear() === second.getFullYear() &&
+  first.getMonth() === second.getMonth() &&
+  first.getDate() === second.getDate();
 
-const wrong = require('../../core/wrong.json');
-const check = require('../../core/check.json');
+const QuestionView = ({ navigation, route }) => {
+  const index = route.params?.index ?? 0;
+  const moduleId = route.params?.moduleId;
+  const itemId = route.params?.itemId;
+  const title = route.params?.title ?? '';
+  const [questions, setQuestions] = useState([]);
+  const [question, setQuestion] = useState([]);
 
-const Feedback = ({ feedback }) => {
-  const [isVisible, setIsVisible] = React.useState(false);
+  const [data, setData] = useState({});
+  const [visible, setVisible] = useState(false);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      title
+    });
+  }, [navigation]);
 
   React.useEffect(() => {
-    if (feedback) {
-      setIsVisible(true);
-      if (feedback !== 'acertou') {
-        ReactNativeHapticFeedback.trigger('notificationError', options);
-      }
+    (async() => {
+      const items = await firestore()
+          .collection('modules')
+          .doc(moduleId)
+          .collection('items')
+          .doc(itemId)
+          .collection('questions')
+          .get();
+      setQuestions(items.docs.map(doc => doc.data()));
+    })();
+  }, []);
+
+  React.useEffect(() => {
+    if (questions?.length) {
+      setQuestion(questions[index].items);
     }
-  }, [feedback]);
+  }, [questions]);
+
+  const onChange = (itemId, value) => {
+    setData({ ...data, [itemId]: value });
+  }
+
+  const onUserConfirm = (userId, value) => {
+    const userReference = firestore().doc(`users/${userId}`);
+  
+    return firestore().runTransaction(async transaction => {
+      const userSnapshot = await transaction.get(userReference);
+  
+      if (!userSnapshot.exists) {
+        throw 'User does not exist!';
+      }
+
+      let newValue = (userSnapshot.data().stars ?? 0) + value;
+      if (newValue < 0) {
+        newValue = 0;
+      }
+
+      let streak = userSnapshot.data().streak;
+      let lastAnswer = userSnapshot.data().lastAnswer;
+      if (lastAnswer?.seconds) {
+        let lastdate = new Date(lastAnswer.seconds * 1000);
+        let yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+        if (datesAreOnSameDay(lastdate, yesterday)) {
+          streak += 1;
+        } else {
+          streak = 1;
+        }
+      } else {
+        streak = 1;
+      }
+  
+      await transaction.update(userReference, {
+        stars: newValue,
+        streak: streak,
+        lastAnswer: new Date()
+      });
+    });
+  }
+
+  const onSubmit = async() => {
+    const answers = question.filter(item => item.answer);
+    const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
+    setVisible(true);
+
+    try {
+      await onUserConfirm(DeviceInfo.getUniqueId(), accepted ? 1 : -1);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const animationCallback = () => {
+    setVisible(false);
+    if (index < questions.length - 1) {
+      navigation.push('QuestionView', {
+        moduleId: moduleId,
+        itemId: itemId,
+        questions,
+        index: index + 1,
+        title: title
+      });
+    } else {
+      navigation.navigate('ModuleView');
+    }
+  }
 
   return (
-    <Modal isVisible={isVisible}>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAwareFlatList
+        data={question}
+        renderItem={({ item }) => <Element element={item} onChange={onChange} />}
+        ItemSeparatorComponent={() => <Separator />}
+        keyExtractor={item => item.id?.toString?.()}
+        contentContainerStyle={styles.contentContainerStyle}
+        style={styles.content}
+        enableAutomaticScroll={false}
+      />
+      <Footer
+        text={index === questions.length - 1 ? 'Finalizar' : 'Continuar'}
+        onSubmit={onSubmit}
+      />
+      <KeyboardSpacer />
+      <Modal
+        isVisible={visible}
+        hideModalContentWhileAnimating
+        animationInTiming={0}
+        animationOutTiming={0}
+      >
         <LottieView
-          source={feedback === 'acertou' ? check : wrong}
+          source={require('./../../core/check.json')}
           autoPlay
           loop={false}
-          style={{ height: 200, width: 200 }}
-          onAnimationFinish={() => setIsVisible(false)}
+          style={styles.animation}
+          onAnimationFinish={animationCallback}
         />
-      </View>
-    </Modal>
+      </Modal>
+    </SafeAreaView>
   );
 }
-
-const Submit = ({
-  onSubmit,
-  onNext,
-  text,
-  feedback,
-  style
-}) => {
-  return (
-    <View style={styles.submit}>
-      <TouchableOpacity style={[styles.button, style]} onPress={feedback ? onNext : onSubmit}>
-        <Text style={styles.check}>{text}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-const Question = ({ question }) => (
-  <Text
-    style={{
-      marginBottom: 16,
-      fontSize: question.format.size,
-      fontWeight: question.format.weight
-    }}
-  >
-    {question.text}
-  </Text>
-);
-Question.propTypes = {
-  question: PropTypes.object
-};
-
-const Answer = ({ answer, onChangeText, feedback }) => {
-  let style = {};
-  if (feedback === 'acertou') {
-    style = { borderColor: '#00ff00' };
-  }
-  if (feedback === 'errou') {
-    style = { borderColor: '#cc0000' };
-  }
-  switch(answer.type) {
-    case 'input':
-      return (
-        <>
-          <Text>{answer.label}</Text>
-          <TextInput
-            editable={!feedback}
-            onChangeText={text => onChangeText(text, answer.id)}
-            style={[styles.input, style]}
-          />
-        </>
-      );
-  }
-};
-
-const QuestionView = ({ route, navigation }) => {
-  const itemId = route.params?.itemId ?? 0;
-  const [answers, setAnswers] = React.useState({});
-  const [feedback, setFeedback] = React.useState(false);
-
-  const onChangeText = (text, id) => {
-    const answersCopy = answers;
-    answersCopy[id] = text;
-    setAnswers(answersCopy);
-  };
-
-  const onSubmit = () => {
-    const validResponse = data[itemId].answers.filter(answer => answer.value !== answers[answer.id]).length === 0;
-    setFeedback(validResponse ? 'acertou' : 'errou');
-  }
-  
-  const onNext = () => {
-    if (data.length - 1 > itemId) {
-      navigation?.push?.('QuestionView', { itemId: itemId + 1 })
-    }
-  }
-
-  let style = {};
-  if (feedback === 'acertou') {
-    style = { backgroundColor: '#00ff00' };
-  }
-  if (feedback === 'errou') {
-    style = { backgroundColor: '#cc0000' };
-  }
-
-  let text = 'Checar';
-  if (feedback) {
-    text = 'Próximo';
-    if (data.length - 1 === itemId) {
-      text = 'Finalizar';
-      style = {};
-    }
-  }
-
-  return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
-        <View style={styles.content}>
-          {data[itemId].question.map(question => <Question question={question} />)}
-          <Image
-            source={{ uri: data[itemId].image }}
-            style={{ height: 250, width: 250 }}
-            resizeMode='contain'
-          />
-          {data[itemId].answers.map(answer => (
-            <Answer
-              answer={answer}
-              answers={answers}
-              onChangeText={onChangeText}
-              feedback={feedback}
-            />
-          ))}
-        </View>
-      </ScrollView>
-      <Submit
-        onSubmit={onSubmit}
-        onNext={onNext}
-        feedback={feedback}
-        text={text}
-        style={style}
-      />
-      <Feedback feedback={feedback} />
-    </View>
-  );
-};
 
 export default QuestionView;

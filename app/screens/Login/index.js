@@ -2,91 +2,112 @@ import React from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   StyleSheet,
   TouchableOpacity
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
+import DeviceInfo from 'react-native-device-info';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import firestore from '@react-native-firebase/firestore';
+import { connect } from 'react-redux';
 
 import Loading from '../../containers/Loading';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    alignItems: 'center',
+    padding: 32,
+    backgroundColor: '#1C375B',
     justifyContent: 'center'
+  },
+  image: {
+    width: 156,
+    height: 156,
+    alignSelf: 'center',
+    marginBottom: 24
+  },
+  title: {
+    fontSize: 36,
+    color: 'white'
+  },
+  titleBox: {
+    marginBottom: 24
+  },
+  bold: {
+    fontWeight: 'bold'
   },
   textInput: {
     width: '100%',
     borderRadius: 4,
     borderColor: '#000',
+    backgroundColor: 'white',
     borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: 8,
+    marginBottom: 16,
+    fontSize: 16,
     padding: 8
   },
   button: {
     width: '100%',
     borderRadius: 4,
     borderColor: '#000',
+    backgroundColor: 'white',
     borderWidth: StyleSheet.hairlineWidth,
-    backgroundColor: 'gray',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
     padding: 8
+  },
+  buttonText: {
+    fontWeight: '600'
   }
 });
 
-const ERROR = {
-  EMAIL_ALREADY_IN_USE: 'auth/email-already-in-use'
-};
-
-const LoginView = () => {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+const LoginView = ({ login }) => {
+  const [name, setName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
   const onPress = async() => {
     setLoading(true);
     try {
-      await auth().createUserWithEmailAndPassword(email, password);
+      const id = DeviceInfo.getUniqueId();
+      await AsyncStorage.setItem('authentication', name);
+      await firestore().collection('users').doc(id).set({ name });
     } catch (e) {
-      if (e.code === ERROR.EMAIL_ALREADY_IN_USE) {
-        try {
-          await auth().signInWithEmailAndPassword(email, password);
-          return;
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      setLoading(false);
+      // Do nothing
     }
+    setLoading(false);
+    login({ name });
   }
 
   return (
     <View style={styles.container}>
-      <TextInput
-        placeholder='E-mail'
-        style={styles.textInput}
-        keyboardType='email-address'
-        autoCapitalize='none'
-        onChangeText={setEmail}
-        value={email}
+      <Image
+        source={require('../../resources/onboarding.png')}
+        style={styles.image}
       />
+      <Text style={styles.titleBox}>
+        <Text style={styles.title}>Aprenda</Text>
+        <Text style={[styles.title, styles.bold]}>{'\nMatemática\n'}</Text>
+        <Text style={styles.title}>e se divirta</Text>
+      </Text>
       <TextInput
-        placeholder='Senha'
+        placeholder='Digite seu nome'
         style={styles.textInput}
-        onChangeText={setPassword}
-        value={password}
-        secureTextEntry
+        autoCapitalize='words'
+        onChangeText={setName}
+        value={name}
       />
       <TouchableOpacity onPress={onPress} style={styles.button}>
-        <Text>Login</Text>
+        <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
       <Loading visible={loading} />
     </View>
   );
 }
 
-export default LoginView;
+const mapDispatchToProps = (dispatch) => ({
+	login: (payload) => dispatch({ type: 'LOGIN', payload })
+});
+
+export default connect(null, mapDispatchToProps)(LoginView);
