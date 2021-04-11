@@ -10,12 +10,14 @@ import {
   Image
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 
 import Loading from '../../containers/Loading';
 import { connect } from 'react-redux';
 import Header from './Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const styles = StyleSheet.create({
   screen: {
@@ -75,7 +77,7 @@ const Module = ({ item }) => {
   );
 };
 
-const Home = ({ navigation, user }) => {
+const Home = ({ navigation, user, logout }) => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -102,9 +104,23 @@ const Home = ({ navigation, user }) => {
     })();
   }, []);
 
+  const onLogout = async() => {
+    try {
+      await AsyncStorage.removeItem('authentication');
+    } catch {
+      // Do nothing
+    }
+    logout();
+  }
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      title: `Olá, ${user?.name}`
+      title: `Olá, ${user?.name}`,
+      headerRight: () => (
+        <TouchableOpacity onPress={onLogout}>
+          <MaterialCommunityIcons name='logout' size={24} color='#fff' />
+        </TouchableOpacity>
+      ),
     });
   }, [navigation, user]);
 
@@ -128,4 +144,7 @@ const Home = ({ navigation, user }) => {
 const mapStateToProps = (state) => ({
   user: state.user
 });
-export default connect(mapStateToProps)(Home);
+const mapDispatchToProps = (dispatch) => ({
+  logout: () => dispatch({ type: 'LOGOUT' })
+});
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

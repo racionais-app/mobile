@@ -12,7 +12,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import HomeView from './screens/Home';
 import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
-import SettingsView from './screens/Settings';
+// import SettingsView from './screens/Settings';
 
 enableScreens();
 
@@ -92,7 +92,7 @@ const InsideTab = () => (
 				),
 			}}
 		/>
-		<Inside.Screen
+		{/* <Inside.Screen
 			name='Settings'
 			component={SettingsStack}
 			options={{
@@ -101,7 +101,7 @@ const InsideTab = () => (
 					<MaterialCommunityIcons name='cog' color={color} size={size} />
 				),
 			}}
-		/>
+		/> */}
 	</Inside.Navigator>
 );
 
