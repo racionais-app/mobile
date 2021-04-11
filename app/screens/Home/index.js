@@ -13,6 +13,7 @@ import firestore from '@react-native-firebase/firestore';
 
 import Loading from '../../containers/Loading';
 import StarBalance from '../../containers/StarBalance';
+import { connect } from 'react-redux';
 
 const styles = StyleSheet.create({
   container: {
@@ -58,7 +59,7 @@ const Module = ({ item }) => {
   );
 };
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation, user }) => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -87,9 +88,10 @@ const Home = ({ navigation }) => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
+      title: `Olá, ${user?.name}!`,
       headerRight: () => <StarBalance />
     });
-  }, [navigation]);
+  }, [navigation, user]);
 
   return (
     <>
@@ -106,4 +108,7 @@ const Home = ({ navigation }) => {
   );
 };
 
-export default Home;
+const mapStateToProps = (state) => ({
+  user: state.user
+});
+export default connect(mapStateToProps)(Home);

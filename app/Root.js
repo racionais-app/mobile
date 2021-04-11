@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from 'react-native-screens/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import HomeView from './screens/Home';
 import LoginView from './screens/Login';
@@ -84,16 +85,28 @@ const InsideTab = () => (
 		<Inside.Screen
 			name='Home'
 			component={HomeStack}
+			options={{
+				tabBarLabel: 'Início',
+				tabBarIcon: ({ color, size }) => (
+					<MaterialCommunityIcons name='home' color={color} size={size} />
+				),
+			}}
 		/>
 		<Inside.Screen
 			name='Settings'
 			component={SettingsStack}
+			options={{
+				tabBarLabel: 'Configurações',
+				tabBarIcon: ({ color, size }) => (
+					<MaterialCommunityIcons name='cog' color={color} size={size} />
+				),
+			}}
 		/>
 	</Inside.Navigator>
 );
 
 // InsideTab
-const App = createStackNavigator();
+const App = createNativeStackNavigator();
 const AppStack = () => (
 	<App.Navigator mode='modal' screenOptions={{ headerShown: false }}>
 		<App.Screen
@@ -111,9 +124,9 @@ const Root = ({ root, login }) => {
 
 	React.useEffect(() => {
 		(async() => {
-			const auth = await AsyncStorage.getItem('authentication');
-			if (auth) {
-				login();
+			const name = await AsyncStorage.getItem('authentication');
+			if (name) {
+				login({ name });
 			}
 		})();
 	}, []);
@@ -136,7 +149,7 @@ const mapStateToProps = (state) => ({
 	root: state.app.root
 });
 const mapDispatchToProps = (dispatch) => ({
-	login: () => dispatch({ type: 'LOGIN' }),
+	login: (user) => dispatch({ type: 'LOGIN', payload: user }),
 	logout: () => dispatch({ type: 'LOGOUT' }),
 });
 

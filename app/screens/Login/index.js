@@ -71,13 +71,13 @@ const LoginView = ({ login }) => {
     setLoading(true);
     try {
       const id = DeviceInfo.getUniqueId();
-      await AsyncStorage.setItem('authentication', DeviceInfo.getUniqueId());
+      await AsyncStorage.setItem('authentication', name);
       await firestore().collection('users').doc(id).set({ name });
     } catch (e) {
       // Do nothing
     }
     setLoading(false);
-    login();
+    login({ name });
   }
 
   return (
@@ -107,7 +107,7 @@ const LoginView = ({ login }) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-	login: () => dispatch({ type: 'LOGIN' })
+	login: (payload) => dispatch({ type: 'LOGIN', payload })
 });
 
 export default connect(null, mapDispatchToProps)(LoginView);
