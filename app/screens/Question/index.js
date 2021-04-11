@@ -16,7 +16,6 @@ import {
   Item,
   HeaderButtons
 } from '../../containers/HeaderButton';
-import StarBalance from '../../containers/StarBalance';
 
 const styles = StyleSheet.create({
   container: {
@@ -41,9 +40,14 @@ const QuestionView = ({ navigation, route }) => {
   const [data, setData] = useState({});
   const [visible, setVisible] = useState(false);
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      title: route.params?.title ?? ''
+    });
+  }, [navigation]);
+
   React.useEffect(() => {
     (async() => {
-      console.log(surveyId, route.params);
       const items = await firestore()
           .collection('modules')
           .doc(surveyId)
@@ -73,7 +77,7 @@ const QuestionView = ({ navigation, route }) => {
         throw 'User does not exist!';
       }
 
-      let newValue = userSnapshot.data().stars + value;
+      let newValue = userSnapshot.data().stars + parseInt(value, 10);
       if (newValue < 0) {
         newValue = 0;
       }
@@ -99,7 +103,7 @@ const QuestionView = ({ navigation, route }) => {
   const animationCallback = () => {
     setVisible(false);
     if (index < questions.length - 1) {
-      navigation.push('QuestionView', { questions, index: index + 1 });
+      navigation.push('QuestionView', { surveyId: surveyId, questions, index: index + 1 });
     } else {
       navigation.navigate('ModuleView');
     }

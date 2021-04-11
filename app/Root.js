@@ -7,7 +7,6 @@ import { createNativeStackNavigator } from 'react-native-screens/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import HomeView from './screens/Home';
 import LoginView from './screens/Login';
@@ -88,43 +87,17 @@ const SettingsStack = () => (
 );
 
 // InsideTab
-const Inside = createBottomTabNavigator();
-const InsideTab = () => (
-	<Inside.Navigator>
-		<Inside.Screen
-			name='Home'
-			component={HomeStack}
-			options={{
-				tabBarLabel: 'Início',
-				tabBarIcon: ({ color, size }) => (
-					<MaterialCommunityIcons name='home' color={color} size={size} />
-				),
-			}}
-		/>
-		{/* <Inside.Screen
-			name='Settings'
-			component={SettingsStack}
-			options={{
-				tabBarLabel: 'Configurações',
-				tabBarIcon: ({ color, size }) => (
-					<MaterialCommunityIcons name='cog' color={color} size={size} />
-				),
-			}}
-		/> */}
-	</Inside.Navigator>
-);
-
-// InsideTab
 const App = createNativeStackNavigator();
 const AppStack = () => (
 	<App.Navigator mode='modal' screenOptions={{ headerShown: false }}>
-		<App.Screen
-			name='Inside'
-			component={InsideTab}
+		<Inside.Screen
+			name='Home'
+			component={HomeStack}
 		/>
 		<App.Screen
-			name='QuestionStack'
-			component={QuestionStack}
+			name='QuestionView'
+			component={QuestionView}
+			options={{ gestureEnabled: false, headerShown: true, ...defaultScreenOptions }}
 		/>
 	</App.Navigator>
 );

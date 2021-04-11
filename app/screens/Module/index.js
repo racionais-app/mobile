@@ -78,13 +78,10 @@ const ModuleView = ({ route, navigation }) => {
     if (item.type === 'video') {
       setPlaying(true);
     } else {
-      console.log({ surveyId: item.surveyId });
-      navigation.navigate('QuestionStack', {
-        name: 'QuestionView',
-        params: {
-          surveyId: item.surveyId
-        }
-      })
+      navigation.navigate('QuestionView', {
+        surveyId: item.surveyId,
+        title: item.name
+      });
     }
   }
 
