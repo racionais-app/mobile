@@ -77,7 +77,7 @@ const QuestionView = ({ navigation, route }) => {
         throw 'User does not exist!';
       }
 
-      let newValue = userSnapshot.data().stars + parseInt(value, 10);
+      let newValue = userSnapshot.data().stars + value;
       if (newValue < 0) {
         newValue = 0;
       }
