@@ -90,7 +90,7 @@ const SettingsStack = () => (
 const App = createNativeStackNavigator();
 const AppStack = () => (
 	<App.Navigator mode='modal' screenOptions={{ headerShown: false }}>
-		<Inside.Screen
+		<App.Screen
 			name='Home'
 			component={HomeStack}
 		/>
