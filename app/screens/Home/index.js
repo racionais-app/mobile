@@ -6,7 +6,8 @@ import {
   Text,
   View,
   FlatList,
-  StyleSheet
+  StyleSheet,
+  Image
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
@@ -36,16 +37,21 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-    backgroundColor: '#122b61',
+    // backgroundColor: '#122b61',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 16,
     padding: 16
   },
   text: {
-    fontSize: 18,
+    marginTop: 12,
+    fontSize: 12,
     fontWeight: 'bold',
-    color: 'white'
+    color: '#1C375B'
+  },
+  image: {
+    width: 100,
+    height: 100
   }
 });
 
@@ -63,6 +69,7 @@ const Module = ({ item }) => {
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.button}>
+      <Image source={require('../../resources/module.png')} style={styles.image} />
       <Text style={styles.text}>{item.name}</Text>
     </TouchableOpacity>
   );
@@ -109,6 +116,7 @@ const Home = ({ navigation, user }) => {
         renderItem={({ item }) => <Module item={item} />}
         keyExtractor={item => item.name}
         contentContainerStyle={styles.container}
+        horizontal={false}
       />
       <Loading
         visible={loading}

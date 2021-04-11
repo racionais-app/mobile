@@ -114,8 +114,7 @@ const QuestionView = ({ navigation, route }) => {
             onPress={() => navigation.navigate('HomeView')}
           />
         </HeaderButtons>
-      ),
-      headerRight: () => <StarBalance style={{ marginHorizontal: 16 }} />
+      )
     });
   }, [navigation]);
 
