@@ -61,7 +61,7 @@ const Module = ({ item }) => {
   const navigation = useNavigation();
 
   const onPress = () => {
-    navigation.navigate('ExplanationStack');
+    navigation.navigate('ModuleView', { title: item.name });
   }
 
   return (

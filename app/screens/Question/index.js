@@ -5,6 +5,7 @@ import KeyboardSpacer from 'react-native-keyboard-spacer';
 import firestore from '@react-native-firebase/firestore';
 import LottieView from 'lottie-react-native';
 import Modal from 'react-native-modal';
+import DeviceInfo from 'react-native-device-info';
 import isEqual from 'lodash/isEqual';
 
 import Separator from './Components/Separator';
@@ -33,7 +34,7 @@ const styles = StyleSheet.create({
 
 const QuestionView = ({ navigation, route }) => {
   const index = route.params?.index ?? 0;
-  const moduleId = route.params?.moduleId;
+  const surveyId = route.params?.surveyId;
   const [questions, setQuestions] = useState([]);
   const [question, setQuestion] = useState([]);
 
@@ -42,9 +43,10 @@ const QuestionView = ({ navigation, route }) => {
 
   React.useEffect(() => {
     (async() => {
+      console.log(surveyId, route.params);
       const items = await firestore()
           .collection('modules')
-          .doc(moduleId)
+          .doc(surveyId)
           .collection('questions')
           .get();
       setQuestions(items.docs.map(doc => doc.data()));
@@ -88,7 +90,7 @@ const QuestionView = ({ navigation, route }) => {
     setVisible(true);
 
     try {
-      await onUserConfirm('CMEHDWOQeCbiCozYSewT', accepted ? 1 : -1);
+      await onUserConfirm(DeviceInfo.getUniqueId(), accepted ? 1 : -1);
     } catch (e) {
       console.error(e);
     }
@@ -99,7 +101,7 @@ const QuestionView = ({ navigation, route }) => {
     if (index < questions.length - 1) {
       navigation.push('QuestionView', { questions, index: index + 1 });
     } else {
-      navigation.navigate('HomeView');
+      navigation.navigate('ModuleView');
     }
   }
 
@@ -111,7 +113,7 @@ const QuestionView = ({ navigation, route }) => {
             iconName='close'
             iconSize={24}
             color='white'
-            onPress={() => navigation.navigate('HomeView')}
+            onPress={() => navigation.navigate('ModuleView')}
           />
         </HeaderButtons>
       )

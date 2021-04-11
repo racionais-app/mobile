@@ -12,8 +12,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import HomeView from './screens/Home';
 import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
+import ModuleView from './screens/Module';
 // import SettingsView from './screens/Settings';
-import ExplanationView from './screens/Explanation';
 
 enableScreens();
 
@@ -65,6 +65,14 @@ const HomeStack = () => (
 			name='HomeView'
 			component={HomeView}
 		/>
+		<Home.Screen
+			name='ModuleView'
+			component={ModuleView}
+			options={{
+				headerLargeTitle: false,
+				headerBackTitle: ''
+			}}
+		/>
 	</Home.Navigator>
 );
 
@@ -77,24 +85,6 @@ const SettingsStack = () => (
 			component={SettingsView}
 		/>
 	</Settings.Navigator>
-);
-
-// ExplanationStack
-const Explanation = createStackNavigator();
-const ExplanationStack = () => (
-	<Explanation.Navigator
-		screenOptions={{
-			headerStyle: {
-				backgroundColor: '#122b61'
-			},
-			headerTintColor: 'white'
-		}}
-	>
-		<Explanation.Screen
-			name='ExplanationView'
-			component={ExplanationView}
-		/>
-	</Explanation.Navigator>
 );
 
 // InsideTab
@@ -135,10 +125,6 @@ const AppStack = () => (
 		<App.Screen
 			name='QuestionStack'
 			component={QuestionStack}
-		/>
-		<App.Screen
-			name='ExplanationStack'
-			component={ExplanationStack}
 		/>
 	</App.Navigator>
 );
