@@ -14,11 +14,13 @@ import firestore from '@react-native-firebase/firestore';
 import Loading from '../../containers/Loading';
 import StarBalance from '../../containers/StarBalance';
 import { connect } from 'react-redux';
+import Header from './Header';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16
+    padding: 16,
+    backgroundColor: '#F0F0F5'
   },
   content: {
     flex: 1,
@@ -88,13 +90,13 @@ const Home = ({ navigation, user }) => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      title: `Olá, ${user?.name}!`,
-      headerRight: () => <StarBalance />
+      title: `Olá, ${user?.name}`
     });
   }, [navigation, user]);
 
   return (
     <>
+      <Header />
       <FlatList
         data={modules}
         renderItem={({ item }) => <Module item={item} />}

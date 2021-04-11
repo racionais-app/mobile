@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
 import DeviceInfo from 'react-native-device-info';
 
@@ -17,8 +17,8 @@ const styles = StyleSheet.create({
   }
 });
 
-const StarBalance = ({ style }) => {
-  const [stars, setStars] = React.useState(0);
+const HeartBalance = ({ style }) => {
+  const [lifes, setLifes] = React.useState(0);
 
   React.useEffect(() => {
     const subscriber = firestore()
@@ -26,7 +26,7 @@ const StarBalance = ({ style }) => {
       .doc(DeviceInfo.getUniqueId())
       .onSnapshot(documentSnapshot => {
         const data = documentSnapshot.data();
-        setStars(data.stars ?? 0);
+        setLifes(data.lifes ?? 0);
       });
 
     return () => subscriber();
@@ -34,10 +34,10 @@ const StarBalance = ({ style }) => {
 
   return (
     <View style={[styles.container, style]}>
-      <MaterialIcons name='star' size={24} color='#FFD700' />
-      <Text style={styles.text}>{stars}</Text>
+      <MaterialCommunityIcons name='heart' size={24} color='#E31B23' />
+      <Text style={styles.text}>{lifes}</Text>
     </View>
   );
 };
 
-export default StarBalance;
+export default HeartBalance;
