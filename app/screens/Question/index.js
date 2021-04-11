@@ -33,7 +33,8 @@ const datesAreOnSameDay = (first, second) =>
 
 const QuestionView = ({ navigation, route }) => {
   const index = route.params?.index ?? 0;
-  const surveyId = route.params?.surveyId;
+  const moduleId = route.params?.moduleId;
+  const itemId = route.params?.itemId;
   const title = route.params?.title ?? '';
   const [questions, setQuestions] = useState([]);
   const [question, setQuestion] = useState([]);
@@ -51,7 +52,9 @@ const QuestionView = ({ navigation, route }) => {
     (async() => {
       const items = await firestore()
           .collection('modules')
-          .doc(surveyId)
+          .doc(moduleId)
+          .collection('items')
+          .doc(itemId)
           .collection('questions')
           .get();
       setQuestions(items.docs.map(doc => doc.data()));
@@ -120,7 +123,13 @@ const QuestionView = ({ navigation, route }) => {
   const animationCallback = () => {
     setVisible(false);
     if (index < questions.length - 1) {
-      navigation.push('QuestionView', { surveyId: surveyId, questions, index: index + 1, title: title });
+      navigation.push('QuestionView', {
+        moduleId: moduleId,
+        itemId: itemId,
+        questions,
+        index: index + 1,
+        title: title
+      });
     } else {
       navigation.navigate('ModuleView');
     }

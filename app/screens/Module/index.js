@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import { View, StyleSheet, Text } from 'react-native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import firestore from '@react-native-firebase/firestore';
 
 const styles = StyleSheet.create({
   container: {
@@ -26,6 +27,16 @@ const styles = StyleSheet.create({
   }
 });
 
+const compare = (a, b) => {
+  if (a.order < b.order){
+    return -1;
+  }
+  if (a.order > b.order){
+    return 1;
+  }
+  return 0;
+}
+
 const Item = ({ items, index, item, onPress }) => (
   <TouchableOpacity onPress={() => onPress(item)} disabled={index === 0 ? false : !items[index - 1]?.completed}>
     <View style={[styles.item, { backgroundColor: '#F5F5F5' }]}>
@@ -48,6 +59,7 @@ const ModuleView = ({ route, navigation }) => {
   const playerRef = React.useRef();
   const [playing, setPlaying] = useState(false);
   const [items, setItems] = useState([]);
+  const moduleId = route.params?.moduleId;
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -67,10 +79,22 @@ const ModuleView = ({ route, navigation }) => {
 
   React.useEffect(() => {
     (async() => {
-      setItems([
-        { id: 1, type: 'video', videoId: 'iee2TATGMyI', completed: false, name: 'Introdução a Frações' },
-        { id: 2, type: 'survey', surveyId: 'FsIN1B3G0f7GYqJCshZ1', completed: false, name: 'Dividir formas em partes iguais' }
-      ])
+      const data = await firestore()
+        .collection('modules')
+        .doc(moduleId)
+        .collection('items')
+        .get();
+
+      let items = data.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }));
+
+      items = items
+        .map(item => ({ ...item, order: item.type === 'video' ? 0 : 1 }));
+
+      items = items
+        .sort(compare);
+      
+      setItems(items);
     })();
   }, []);
 
@@ -79,7 +103,8 @@ const ModuleView = ({ route, navigation }) => {
       setPlaying(true);
     } else {
       navigation.navigate('QuestionView', {
-        surveyId: item.surveyId,
+        itemId: item.id,
+        moduleId,
         title: item.name
       });
     }
@@ -97,7 +122,7 @@ const ModuleView = ({ route, navigation }) => {
       <FlatList
         data={items}
         renderItem={({ item, index }) => <Item items={items} index={index} item={item} onPress={onPress} />}
-        keyExtractor={item => item.id?.toString?.()}
+        keyExtractor={item => item.id}
       />
     </View>
   );

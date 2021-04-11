@@ -61,7 +61,7 @@ const Module = ({ item }) => {
   const navigation = useNavigation();
 
   const onPress = () => {
-    navigation.navigate('ModuleView', { title: item.name });
+    navigation.navigate('ModuleView', { moduleId: item.id, title: item.name });
   }
 
   return (
