@@ -13,6 +13,7 @@ import HomeView from './screens/Home';
 import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
 // import SettingsView from './screens/Settings';
+import ExplanationView from './screens/Explanation';
 
 enableScreens();
 
@@ -78,6 +79,24 @@ const SettingsStack = () => (
 	</Settings.Navigator>
 );
 
+// ExplanationStack
+const Explanation = createStackNavigator();
+const ExplanationStack = () => (
+	<Explanation.Navigator
+		screenOptions={{
+			headerStyle: {
+				backgroundColor: '#122b61'
+			},
+			headerTintColor: 'white'
+		}}
+	>
+		<Explanation.Screen
+			name='ExplanationView'
+			component={ExplanationView}
+		/>
+	</Explanation.Navigator>
+);
+
 // InsideTab
 const Inside = createBottomTabNavigator();
 const InsideTab = () => (
@@ -116,6 +135,10 @@ const AppStack = () => (
 		<App.Screen
 			name='QuestionStack'
 			component={QuestionStack}
+		/>
+		<App.Screen
+			name='ExplanationStack'
+			component={ExplanationStack}
 		/>
 	</App.Navigator>
 );

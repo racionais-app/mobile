@@ -61,12 +61,7 @@ const Module = ({ item }) => {
   const navigation = useNavigation();
 
   const onPress = () => {
-    navigation.navigate('QuestionStack', {
-      screen: 'QuestionView',
-      params: {
-        moduleId: item.id
-      }
-    });
+    navigation.navigate('ExplanationStack');
   }
 
   return (

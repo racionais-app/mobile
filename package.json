@@ -38,6 +38,8 @@
     "react-native-screens": "^2.16.1",
     "react-native-vector-icons": "^8.1.0",
     "react-navigation-header-buttons": "^6.2.1",
+    "react-native-webview": "^11.2.4",
+    "react-native-youtube-iframe": "^1.4.1",
     "react-redux": "^7.2.2",
     "redux": "^4.0.5"
   },
