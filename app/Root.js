@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from 'react-native-screens/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
@@ -97,7 +96,12 @@ const AppStack = () => (
 		<App.Screen
 			name='QuestionView'
 			component={QuestionView}
-			options={{ gestureEnabled: false, headerShown: true, ...defaultScreenOptions }}
+			options={{
+				gestureEnabled: false,
+				headerShown: true,
+				headerBackTitleVisible: false,
+				...defaultScreenOptions
+			}}
 		/>
 	</App.Navigator>
 );

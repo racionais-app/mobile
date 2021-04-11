@@ -12,11 +12,6 @@ import Separator from './Components/Separator';
 import Element from './Components/Element';
 import Footer from './Components/Footer';
 
-import {
-  Item,
-  HeaderButtons
-} from '../../containers/HeaderButton';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -31,9 +26,15 @@ const styles = StyleSheet.create({
   }
 });
 
+const datesAreOnSameDay = (first, second) =>
+  first.getFullYear() === second.getFullYear() &&
+  first.getMonth() === second.getMonth() &&
+  first.getDate() === second.getDate();
+
 const QuestionView = ({ navigation, route }) => {
   const index = route.params?.index ?? 0;
   const surveyId = route.params?.surveyId;
+  const title = route.params?.title ?? '';
   const [questions, setQuestions] = useState([]);
   const [question, setQuestion] = useState([]);
 
@@ -42,7 +43,7 @@ const QuestionView = ({ navigation, route }) => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      title: route.params?.title ?? ''
+      title
     });
   }, [navigation]);
 
@@ -77,13 +78,29 @@ const QuestionView = ({ navigation, route }) => {
         throw 'User does not exist!';
       }
 
-      let newValue = userSnapshot.data().stars + value;
+      let newValue = (userSnapshot.data().stars ?? 0) + value;
       if (newValue < 0) {
         newValue = 0;
       }
+
+      let streak = userSnapshot.data().streak;
+      let lastAnswer = userSnapshot.data().lastAnswer;
+      if (lastAnswer?.seconds) {
+        let lastdate = new Date(lastAnswer.seconds * 1000);
+        let yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+        if (datesAreOnSameDay(lastdate, yesterday)) {
+          streak += 1;
+        } else {
+          streak = 1;
+        }
+      } else {
+        streak = 1;
+      }
   
       await transaction.update(userReference, {
-        stars: newValue
+        stars: newValue,
+        streak: streak,
+        lastAnswer: new Date()
       });
     });
   }
@@ -103,7 +120,7 @@ const QuestionView = ({ navigation, route }) => {
   const animationCallback = () => {
     setVisible(false);
     if (index < questions.length - 1) {
-      navigation.push('QuestionView', { surveyId: surveyId, questions, index: index + 1 });
+      navigation.push('QuestionView', { surveyId: surveyId, questions, index: index + 1, title: title });
     } else {
       navigation.navigate('ModuleView');
     }
