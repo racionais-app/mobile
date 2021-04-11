@@ -109,21 +109,6 @@ const QuestionView = ({ navigation, route }) => {
     }
   }
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <HeaderButtons>
-          <Item
-            iconName='close'
-            iconSize={24}
-            color='white'
-            onPress={() => navigation.navigate('ModuleView')}
-          />
-        </HeaderButtons>
-      )
-    });
-  }, [navigation]);
-
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAwareFlatList
