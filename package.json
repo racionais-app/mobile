@@ -32,6 +32,7 @@
     "react-native-keyboard-spacer": "^0.4.1",
     "react-native-markdown-display": "^7.0.0-alpha.2",
     "react-native-modal": "^11.6.1",
+    "react-native-onboarding-swiper": "^1.1.4",
     "react-native-popover-view": "^3.1.1",
     "react-native-reanimated": "^1.13.2",
     "react-native-safe-area-context": "^3.1.9",
