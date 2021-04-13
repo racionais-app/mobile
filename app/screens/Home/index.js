@@ -1,4 +1,5 @@
 import React, {
+  useRef,
   useState,
   useEffect
 } from 'react';
@@ -13,6 +14,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
+import Popover from 'react-native-popover-view';
 
 import Loading from '../../containers/Loading';
 import { connect } from 'react-redux';
@@ -54,22 +56,73 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100
+  },
+  arrow: {
+    backgroundColor: '#e6e6e6'
+  },
+  popover: {
+    padding: 16,
+    backgroundColor: '#e6e6e6',
+    shadowOffset: {
+      width: 0,
+      height: -1,
+    },
+    shadowColor: 'gray',
+    shadowOpacity: 0.5,
+    elevation: 1
+  },
+  background: {
+    backgroundColor: 'transparent'
   }
 });
 
-const Module = ({ item }) => {
+const Module = ({ item, index }) => {
+  const touchable = useRef();
   const navigation = useNavigation();
+  const [showPopover, setShowPopover] = useState(false);
 
-  const onPress = () => {
+  React.useEffect(() => {
+    (async() => {
+      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+      if (!onboardingStepString) {
+        setShowPopover(true);
+      }
+    })();
+  }, []);
+
+  const onPress = async() => {
+    setShowPopover(false);
+    await AsyncStorage.setItem('onboardingStep', '1');
     navigation.navigate('ModuleView', { moduleId: item.id, title: item.name });
   }
 
-  return (
-    <TouchableOpacity onPress={onPress} style={styles.button}>
+  let content = (
+    <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
       <Image source={require('../../resources/module.png')} style={styles.image} />
       <Text style={styles.text}>{item.name}</Text>
     </TouchableOpacity>
   );
+
+  if (index === 0) {
+    content = (
+      <>
+        {content}
+        <Popover
+          from={touchable}
+          isVisible={showPopover}
+          onRequestClose={onPress}
+          backgroundStyle={styles.background}
+          arrowStyle={styles.arrow}
+        >
+          <View style={styles.popover}>
+            <Text>Para começar, clique em um módulo</Text>
+          </View>
+        </Popover>
+      </>
+    );
+  }
+
+  return content;
 };
 
 const Home = ({ navigation, user, logout }) => {
@@ -125,7 +178,7 @@ const Home = ({ navigation, user, logout }) => {
       <Header />
       <FlatList
         data={modules}
-        renderItem={({ item }) => <Module item={item} />}
+        renderItem={({ item, index }) => <Module index={index} item={item} />}
         keyExtractor={item => item.name}
         contentContainerStyle={styles.container}
         horizontal={false}

@@ -20,6 +20,8 @@
     <string>Octicons.ttf</string>
     <string>Zocial.ttf</string>
   </array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

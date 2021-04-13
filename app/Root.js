@@ -112,6 +112,7 @@ const Root = ({ root, login, onboarding }) => {
 
 	React.useEffect(() => {
 		(async() => {
+			await AsyncStorage.removeItem('onboardingStep');
 			const intro = await AsyncStorage.getItem('onboarding');
 			const name = await AsyncStorage.getItem('authentication');
 			if (name) {
