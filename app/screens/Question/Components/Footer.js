@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity
 } from 'react-native';
+import Popover from 'react-native-popover-view';
 
 const styles = StyleSheet.create({
   submit: {
@@ -31,15 +32,49 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     color: 'white'
+  },
+  arrow: {
+    backgroundColor: '#e6e6e6'
+  },
+  popover: {
+    padding: 16,
+    backgroundColor: '#e6e6e6',
+    shadowOffset: {
+      width: 0,
+      height: -1,
+    },
+    shadowColor: 'gray',
+    shadowOpacity: 0.5,
+    elevation: 1
+  },
+  background: {
+    backgroundColor: 'transparent'
   }
 });
 
-const Footer = ({ text, onSubmit }) => (
-  <View style={styles.submit}>
-    <TouchableOpacity style={styles.button} onPress={onSubmit}>
-      <Text style={styles.text}>{text}</Text>
-    </TouchableOpacity>
-  </View>
-);
+const Footer = ({ text, onSubmit, showPopover }) => {
+  const touchable = useRef();
+
+  return (
+    <>
+      <View style={styles.submit}>
+        <TouchableOpacity ref={touchable} style={styles.button} onPress={onSubmit}>
+          <Text style={styles.text}>{text}</Text>
+        </TouchableOpacity>
+      </View>
+      <Popover
+        from={touchable}
+        isVisible={showPopover}
+        onRequestClose={onSubmit}
+        backgroundStyle={styles.background}
+        arrowStyle={styles.arrow}
+      >
+        <View style={styles.popover}>
+          <Text>Clique aqui para prosseguir.</Text>
+        </View>
+      </Popover>
+    </>
+  );
+}
 
 export default Footer;

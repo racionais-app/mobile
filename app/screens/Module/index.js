@@ -85,7 +85,7 @@ const Item = ({ items, index, item, onPress, step }) => {
   let content = (
     <TouchableOpacity
       ref={touchable}
-      onPress={onTouch}
+      onPress={() => onTouch(item)}
       disabled={index === 0 ? false : !items[index - 1]?.completed}
     >
       <View style={[styles.item, { backgroundColor: '#F5F5F5' }]}>
