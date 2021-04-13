@@ -102,6 +102,7 @@ const Home = ({ navigation, user, logout }) => {
   const onLogout = async() => {
     try {
       await AsyncStorage.removeItem('authentication');
+      await AsyncStorage.removeItem('onboarding');
     } catch {
       // Do nothing
     }

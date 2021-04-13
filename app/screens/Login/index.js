@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   }
 });
 
-const LoginView = ({ login }) => {
+const LoginView = ({ onboarding }) => {
   const [name, setName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
@@ -77,7 +77,7 @@ const LoginView = ({ login }) => {
       // Do nothing
     }
     setLoading(false);
-    login({ name });
+    onboarding();
   }
 
   return (
@@ -107,7 +107,7 @@ const LoginView = ({ login }) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-	login: (payload) => dispatch({ type: 'LOGIN', payload })
+	onboarding: () => dispatch({ type: 'ONBOARDING' })
 });
 
 export default connect(null, mapDispatchToProps)(LoginView);
