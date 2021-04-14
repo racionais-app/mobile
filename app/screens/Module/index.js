@@ -6,6 +6,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import firestore from '@react-native-firebase/firestore';
 import Popover from 'react-native-popover-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
+import ModuleModel from '../../core/Module';
 
 const styles = StyleSheet.create({
   container: {
@@ -146,7 +148,7 @@ const ModuleView = ({ route, navigation }) => {
     });
   }, [navigation]);
 
-  const onStateChange = (state) => {
+  const onStateChange = async(state) => {
     if (state === 'ended') {
       setPlaying(false);
       const videoIdx = items.findIndex(item => item.type === 'video');
@@ -154,19 +156,23 @@ const ModuleView = ({ route, navigation }) => {
       newItems[videoIdx].completed = true;
       setItems(newItems);
       setStep(old => (old + 1));
+      try {
+        const userRef = firestore()
+          .collection('users')
+          .doc(DeviceInfo.getUniqueId());
+
+        await userRef.update({
+          done: firestore.FieldValue.arrayUnion(items[videoIdx].id)
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
   React.useEffect(() => {
-    (async() => {
-      const data = await firestore()
-        .collection('modules')
-        .doc(moduleId)
-        .collection('items')
-        .get();
-
-      let items = data.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }));
+    let model = new ModuleModel(moduleId, (data) => {
+      let items = data;
 
       items = items
         .map(item => ({ ...item, order: item.type === 'video' ? 0 : 1 }));
@@ -175,7 +181,9 @@ const ModuleView = ({ route, navigation }) => {
         .sort(compare);
       
       setItems(items);
-    })();
+    });
+
+    return model.unsubscribe;
   }, []);
 
   const onPress = (item) => {

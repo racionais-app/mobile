@@ -137,7 +137,7 @@ const QuestionView = ({ navigation, route }) => {
     }
   }
 
-  const animationCallback = () => {
+  const animationCallback = async() => {
     setVisible(false);
     if (index < questions.length - 1) {
       navigation.push('QuestionView', {
@@ -149,6 +149,17 @@ const QuestionView = ({ navigation, route }) => {
       });
     } else {
       navigation.navigate('ModuleView');
+      try {
+        const userRef = firestore()
+          .collection('users')
+          .doc(DeviceInfo.getUniqueId());
+
+        await userRef.update({
+          done: firestore.FieldValue.arrayUnion(itemId)
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 

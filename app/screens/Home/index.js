@@ -14,12 +14,14 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
+import ProgressCircle from 'react-native-progress-circle'
 import Popover from 'react-native-popover-view';
 
 import Loading from '../../containers/Loading';
 import { connect } from 'react-redux';
 import Header from './Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ModuleModel from '../../core/Module';
 
 const styles = StyleSheet.create({
   screen: {
@@ -73,6 +75,19 @@ const styles = StyleSheet.create({
   },
   background: {
     backgroundColor: 'transparent'
+  },
+  percent: {
+    position: 'absolute',
+    borderRadius: 24,
+    backgroundColor: 'white',
+    padding: 4,
+    right: -24,
+    bottom: 40,
+    borderWidth: 2,
+    borderColor: '#6F8197'
+  },
+  percentage: {
+    fontWeight: 'bold'
   }
 });
 
@@ -80,27 +95,54 @@ const Module = ({ item, index }) => {
   const touchable = useRef();
   const navigation = useNavigation();
   const [showPopover, setShowPopover] = useState(false);
+  const [percentage, setPercentage] = useState(0);
 
   React.useEffect(() => {
-    (async() => {
+    (async () => {
       const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
       if (!onboardingStepString) {
         setShowPopover(true);
       }
     })();
+
+    let model = new ModuleModel(item.id, (data) => {
+      const percent = data.filter(i => i.completed).length / data.length;
+      setPercentage(percent * 100);
+    });
+
+    return model.unsubscribe;
   }, []);
 
-  const onPress = async() => {
+  const onPress = async () => {
     setShowPopover(false);
-    await AsyncStorage.setItem('onboardingStep', '1');
+    const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+    if (!onboardingStepString) {
+      await AsyncStorage.setItem('onboardingStep', '1');
+    }
     navigation.navigate('ModuleView', { moduleId: item.id, title: item.name });
   }
 
   let content = (
-    <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
-      <Image source={require('../../resources/module.png')} style={styles.image} />
-      <Text style={styles.text}>{item.name}</Text>
-    </TouchableOpacity>
+    <View style={{ alignItems: 'center' }}>
+      <View style={{ width: 100 }}>
+        <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
+          <ProgressCircle
+            percent={percentage}
+            radius={64}
+            borderWidth={8}
+            color='#1C375B'
+            shadowColor='#6F8197'
+            bgColor='#FFF'
+          >
+            <Image source={require('../../resources/module.png')} style={styles.image} />
+          </ProgressCircle>
+          <Text style={styles.text}>{item.name}</Text>
+        </TouchableOpacity>
+        <View style={styles.percent}>
+          <Text style={styles.percentage}>{`${percentage}%`}</Text>
+        </View>
+      </View>
+    </View>
   );
 
   if (index === 0) {
@@ -131,7 +173,7 @@ const Home = ({ navigation, user, logout }) => {
 
   useEffect(() => {
     setLoading(true);
-    (async() => {
+    (async () => {
       try {
         const remoteModules = await firestore()
           .collection('modules')
@@ -152,7 +194,7 @@ const Home = ({ navigation, user, logout }) => {
     })();
   }, []);
 
-  const onLogout = async() => {
+  const onLogout = async () => {
     try {
       await AsyncStorage.removeItem('authentication');
       await AsyncStorage.removeItem('onboardingStep');
