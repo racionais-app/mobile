@@ -11,6 +11,7 @@ import isEqual from 'lodash/isEqual';
 import Separator from './Components/Separator';
 import Element from './Components/Element';
 import Footer from './Components/Footer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const styles = StyleSheet.create({
   container: {
@@ -41,6 +42,8 @@ const QuestionView = ({ navigation, route }) => {
 
   const [data, setData] = useState({});
   const [visible, setVisible] = useState(false);
+
+  const [showPopover, setShowPopover] = useState(false);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -109,14 +112,28 @@ const QuestionView = ({ navigation, route }) => {
   }
 
   const onSubmit = async() => {
+    setShowPopover(false);
     const answers = question.filter(item => item.answer);
     const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
-    setVisible(true);
+    const onboardingStep = await AsyncStorage.getItem('onboardingStep');
+    if (onboardingStep === '4') {
+      setTimeout(() => setVisible(true), 500);
+    } else {
+      setVisible(true);
+    }
+    await AsyncStorage.setItem('onboardingStep', '5');
 
     try {
       await onUserConfirm(DeviceInfo.getUniqueId(), accepted ? 1 : -1);
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  const onContinue = async() => {
+    const onboardingStep = await AsyncStorage.getItem('onboardingStep');
+    if (onboardingStep === '4') {
+      setShowPopover(true);
     }
   }
 
@@ -139,7 +156,15 @@ const QuestionView = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <KeyboardAwareFlatList
         data={question}
-        renderItem={({ item }) => <Element element={item} onChange={onChange} />}
+        renderItem={({ item, index }) => (
+          <Element
+            items={question}
+            element={item}
+            onChange={onChange}
+            onContinue={onContinue}
+            index={index}
+          />
+        )}
         ItemSeparatorComponent={() => <Separator />}
         keyExtractor={item => item.id?.toString?.()}
         contentContainerStyle={styles.contentContainerStyle}
@@ -147,6 +172,7 @@ const QuestionView = ({ navigation, route }) => {
         enableAutomaticScroll={false}
       />
       <Footer
+        showPopover={showPopover}
         text={index === questions.length - 1 ? 'Finalizar' : 'Continuar'}
         onSubmit={onSubmit}
       />

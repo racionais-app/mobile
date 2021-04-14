@@ -6,6 +6,8 @@ function app(state = { root: 'OUTSIDE' }, action) {
       return { app: { root: 'INSIDE' }, user: action.payload };
     case 'LOGOUT':
       return { app: { root: 'OUTSIDE' } };
+    case 'ONBOARDING':
+      return { app: { root: 'ONBOARDING' } };
     default:
       return state;
   }

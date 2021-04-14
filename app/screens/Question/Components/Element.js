@@ -5,7 +5,7 @@ import Select from './Select';
 import Input from './Input';
 import Image from './Image';
 
-const Element = ({ element, onChange }) => {
+const Element = ({ element, onChange, items, index, onContinue }) => {
   switch (element.type) {
     case 'text':
       return (
@@ -24,6 +24,9 @@ const Element = ({ element, onChange }) => {
         <Input
           element={element}
           onChange={onChange}
+          onContinue={onContinue}
+          items={items}
+          index={index}
         />
       );
     case 'select':

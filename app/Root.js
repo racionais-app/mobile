@@ -11,13 +11,15 @@ import HomeView from './screens/Home';
 import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
 import ModuleView from './screens/Module';
+import OnboardingView from './screens/Onboarding';
 // import SettingsView from './screens/Settings';
 
 enableScreens();
 
 const ROOT = {
 	OUTSIDE: 'OUTSIDE',
-	INSIDE: 'INSIDE'
+	INSIDE: 'INSIDE',
+	ONBOARDING: 'ONBOARDING'
 };
 
 const defaultScreenOptions = {
@@ -74,15 +76,15 @@ const HomeStack = () => (
 	</Home.Navigator>
 );
 
-// SettingsStack
-const Settings = createStackNavigator();
-const SettingsStack = () => (
-	<Settings.Navigator screenOptions={homeScreenOptions}>
-		<Settings.Screen
-			name='SettingsView'
-			component={SettingsView}
+// OnboardingStack
+const Onboarding = createStackNavigator();
+const OnboardingStack = () => (
+	<Onboarding.Navigator screenOptions={{ headerShown: false }}>
+		<Onboarding.Screen
+			name='OnboardingView'
+			component={OnboardingView}
 		/>
-	</Settings.Navigator>
+	</Onboarding.Navigator>
 );
 
 // InsideTab
@@ -106,13 +108,17 @@ const AppStack = () => (
 	</App.Navigator>
 );
 
-const Root = ({ root, login }) => {
+const Root = ({ root, login, onboarding }) => {
 
 	React.useEffect(() => {
 		(async() => {
+			const intro = await AsyncStorage.getItem('onboarding');
 			const name = await AsyncStorage.getItem('authentication');
 			if (name) {
-				login({ name });
+				if (intro) {
+					return login({ name });
+				}
+				onboarding();
 			}
 		})();
 	}, []);
@@ -122,7 +128,11 @@ const Root = ({ root, login }) => {
 			{
 				root === ROOT.OUTSIDE
 					? <LoginStack />
-					: <AppStack />
+					: (
+						root === ROOT.ONBOARDING
+							? <OnboardingStack />
+							: <AppStack />
+					)
 			}
 		</NavigationContainer>
 	);
@@ -135,6 +145,7 @@ const mapStateToProps = (state) => ({
 	root: state.app.root
 });
 const mapDispatchToProps = (dispatch) => ({
+	onboarding: () => dispatch({ type: 'ONBOARDING' }),
 	login: (user) => dispatch({ type: 'LOGIN', payload: user }),
 	logout: () => dispatch({ type: 'LOGOUT' }),
 });
