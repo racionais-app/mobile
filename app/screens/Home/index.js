@@ -75,6 +75,19 @@ const styles = StyleSheet.create({
   },
   background: {
     backgroundColor: 'transparent'
+  },
+  percent: {
+    position: 'absolute',
+    borderRadius: 24,
+    backgroundColor: 'white',
+    padding: 4,
+    right: -24,
+    bottom: 40,
+    borderWidth: 2,
+    borderColor: '#6F8197'
+  },
+  percentage: {
+    fontWeight: 'bold'
   }
 });
 
@@ -110,19 +123,26 @@ const Module = ({ item, index }) => {
   }
 
   let content = (
-    <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
-      <ProgressCircle
-        percent={percentage}
-        radius={64}
-        borderWidth={8}
-        color='#1C375B'
-        shadowColor='#6F8197'
-        bgColor='#FFF'
-      >
-        <Image source={require('../../resources/module.png')} style={styles.image} />
-      </ProgressCircle>
-      <Text style={styles.text}>{item.name}</Text>
-    </TouchableOpacity>
+    <View style={{ alignItems: 'center' }}>
+      <View style={{ width: 100 }}>
+        <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
+          <ProgressCircle
+            percent={percentage}
+            radius={64}
+            borderWidth={8}
+            color='#1C375B'
+            shadowColor='#6F8197'
+            bgColor='#FFF'
+          >
+            <Image source={require('../../resources/module.png')} style={styles.image} />
+          </ProgressCircle>
+          <Text style={styles.text}>{item.name}</Text>
+        </TouchableOpacity>
+        <View style={styles.percent}>
+          <Text style={styles.percentage}>{`${percentage}%`}</Text>
+        </View>
+      </View>
+    </View>
   );
 
   if (index === 0) {
