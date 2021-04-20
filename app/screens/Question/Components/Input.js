@@ -51,7 +51,10 @@ const Input = ({ element, onChange, items, index, onContinue }) => {
 
   const onClose = async() => {
     setShowPopover(false);
-    await AsyncStorage.setItem('onboardingStep', '4');
+    const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+    if (onboardingStepString === '3') {
+      await AsyncStorage.setItem('onboardingStep', '4');
+    }
     setTimeout(() => input.current.focus(), 500);
   }
 

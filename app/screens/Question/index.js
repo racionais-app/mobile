@@ -121,7 +121,10 @@ const QuestionView = ({ navigation, route }) => {
     } else {
       setVisible(true);
     }
-    await AsyncStorage.setItem('onboardingStep', '5');
+    const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+    if (onboardingStepString === '4') {
+      await AsyncStorage.setItem('onboardingStep', '5');
+    }
 
     try {
       await onUserConfirm(DeviceInfo.getUniqueId(), accepted ? 1 : -1);

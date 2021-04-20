@@ -75,9 +75,15 @@ const Item = ({ items, index, item, onPress, step }) => {
   const onTouch = async(item) => {
     setShowPopover(false);
     if (item.type === 'video') {
-      await AsyncStorage.setItem('onboardingStep', '2');
+      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+      if (onboardingStepString === '1') {
+        await AsyncStorage.setItem('onboardingStep', '2');
+      }
     } else {
-      await AsyncStorage.setItem('onboardingStep', '3');
+      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+      if (onboardingStepString === '2') {
+        await AsyncStorage.setItem('onboardingStep', '3');
+      }
     }
     onPress(item);
   }
