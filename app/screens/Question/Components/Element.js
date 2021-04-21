@@ -4,6 +4,7 @@ import Text from './Text';
 import Select from './Select';
 import Input from './Input';
 import Image from './Image';
+import Fraction from './Fraction';
 
 const Element = ({ element, onChange, items, index, onContinue }) => {
   switch (element.type) {
@@ -17,6 +18,13 @@ const Element = ({ element, onChange, items, index, onContinue }) => {
       return (
         <Image
           element={element}
+        />
+      );
+    case 'fraction':
+      return (
+        <Fraction
+          element={element}
+          onChange={onChange}
         />
       );
     case 'input':
