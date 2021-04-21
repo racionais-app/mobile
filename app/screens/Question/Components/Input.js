@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
 const Input = ({ element, onChange, items, index, onContinue }) => {
   const input = useRef();
   const [showPopover, setShowPopover] = useState(false);
+  const [value, setValue] = useState('');
 
   React.useEffect(() => {
     if (index === items.map(i => i.type).indexOf('input')) {
@@ -59,8 +60,10 @@ const Input = ({ element, onChange, items, index, onContinue }) => {
   }
 
   const onEndEditing = () => {
-    if (index === items.map(i => i.type).indexOf('input')) {
-      onContinue();
+    if (value.length) {
+      if (index === items.map(i => i.type).indexOf('input')) {
+        onContinue();
+      }
     }
   }
 
@@ -70,7 +73,11 @@ const Input = ({ element, onChange, items, index, onContinue }) => {
       <TextInput
         ref={input}
         style={styles.textInput}
-        onChangeText={text => onChange(element.id, text)}
+        value={value}
+        onChangeText={text => {
+          setValue(text);
+          onChange(element.id, text);
+        }}
         defaultValue={element.defaultValue ?? ''}
         placeholder={element.placeholder ?? ''}
         placeholderTextColor='gray'
