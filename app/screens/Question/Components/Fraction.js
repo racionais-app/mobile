@@ -40,7 +40,9 @@ const Fraction = ({ element, onChange }) => {
   }
 
   useEffect(() => {
-    onChange(`${data.numerator ?? 1}/${data.denominator ?? 1}`);
+    if (data.numerator && data.denominator) {
+      onChange(element.id, `${data.numerator}/${data.denominator}`);
+    }
   }, [
     data.numerator,
     data.denominator

@@ -49,16 +49,24 @@ const styles = StyleSheet.create({
   },
   background: {
     backgroundColor: 'transparent'
+  },
+  disabled: {
+    backgroundColor: '#E6E6E6'
   }
 });
 
-const Footer = ({ text, onSubmit, showPopover }) => {
+const Footer = ({ text, onSubmit, showPopover, disabled }) => {
   const touchable = useRef();
 
   return (
     <>
       <View style={styles.submit}>
-        <TouchableOpacity ref={touchable} style={styles.button} onPress={onSubmit}>
+        <TouchableOpacity
+          ref={touchable}
+          style={[styles.button, disabled && styles.disabled]}
+          onPress={onSubmit}
+          disabled={disabled}
+        >
           <Text style={styles.text}>{text}</Text>
         </TouchableOpacity>
       </View>

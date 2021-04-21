@@ -115,6 +115,11 @@ const QuestionView = ({ navigation, route }) => {
     setShowPopover(false);
     const answers = question.filter(item => item.answer);
     const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
+
+    if (!question.filter(item => item.answer).find(item => data[item.id])) {
+      return;
+    }
+    
     const onboardingStep = await AsyncStorage.getItem('onboardingStep');
     if (onboardingStep === '4') {
       setTimeout(() => setVisible(true), 500);
@@ -189,6 +194,7 @@ const QuestionView = ({ navigation, route }) => {
         showPopover={showPopover}
         text={index === questions.length - 1 ? 'Finalizar' : 'Continuar'}
         onSubmit={onSubmit}
+        disabled={!question.filter(item => item.answer).find(item => data[item.id])}
       />
       <KeyboardSpacer />
       <Modal
