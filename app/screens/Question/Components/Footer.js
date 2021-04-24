@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import {
   View,
   Text,
+  Platform,
   StyleSheet,
   TouchableOpacity
 } from 'react-native';
@@ -10,7 +11,7 @@ import Popover from 'react-native-popover-view';
 const styles = StyleSheet.create({
   submit: {
     height: 64,
-    backgroundColor: 'white',
+    backgroundColor: Platform.OS === 'ios' ? 'white' : '#e6e6e6',
     justifyContent: 'center',
     shadowOffset: {
       width: 0,

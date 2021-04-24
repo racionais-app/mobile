@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform } from 'react-native';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import firestore from '@react-native-firebase/firestore';
@@ -27,6 +27,11 @@ const styles = StyleSheet.create({
   }
 });
 
+const IMAGES = {
+  'check': require('./../../core/check.json'),
+  'wrong': require('./../../core/wrong.json')
+};
+
 const datesAreOnSameDay = (first, second) =>
   first.getFullYear() === second.getFullYear() &&
   first.getMonth() === second.getMonth() &&
@@ -41,7 +46,7 @@ const QuestionView = ({ navigation, route }) => {
   const [question, setQuestion] = useState([]);
 
   const [data, setData] = useState({});
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState({});
 
   const [showPopover, setShowPopover] = useState(false);
 
@@ -122,9 +127,9 @@ const QuestionView = ({ navigation, route }) => {
     
     const onboardingStep = await AsyncStorage.getItem('onboardingStep');
     if (onboardingStep === '4') {
-      setTimeout(() => setVisible(true), 500);
+      setTimeout(() => setVisible({ accepted }), 500);
     } else {
-      setVisible(true);
+      setVisible({ accepted });
     }
     const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
     if (onboardingStepString === '4') {
@@ -146,7 +151,7 @@ const QuestionView = ({ navigation, route }) => {
   }
 
   const animationCallback = async() => {
-    setVisible(false);
+    setVisible({});
     if (index < questions.length - 1) {
       navigation.push('QuestionView', {
         moduleId: moduleId,
@@ -196,15 +201,15 @@ const QuestionView = ({ navigation, route }) => {
         onSubmit={onSubmit}
         disabled={!question.filter(item => item.answer).find(item => data[item.id])}
       />
-      <KeyboardSpacer />
+      {Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
       <Modal
-        isVisible={visible}
+        isVisible={visible?.accepted}
         hideModalContentWhileAnimating
         animationInTiming={0}
         animationOutTiming={0}
       >
         <LottieView
-          source={require('./../../core/check.json')}
+          source={visible?.accepted ? IMAGES.check : IMAGES.wrong}
           autoPlay
           loop={false}
           style={styles.animation}

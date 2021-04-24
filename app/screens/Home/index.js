@@ -6,6 +6,7 @@ import React, {
 import {
   Text,
   View,
+  Platform,
   FlatList,
   StyleSheet,
   Image
@@ -88,6 +89,9 @@ const styles = StyleSheet.create({
   },
   percentage: {
     fontWeight: 'bold'
+  },
+  headerRight: {
+    marginHorizontal: Platform.OS === 'android' ? 16 : 0
   }
 });
 
@@ -124,7 +128,7 @@ const Module = ({ item, index }) => {
 
   let content = (
     <View style={{ alignItems: 'center' }}>
-      <View style={{ width: 100 }}>
+      <View style={{ width: 128 }}>
         <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
           <ProgressCircle
             percent={percentage}
@@ -209,7 +213,7 @@ const Home = ({ navigation, user, logout }) => {
     navigation.setOptions({
       title: `Olá, ${user?.name}`,
       headerRight: () => (
-        <TouchableOpacity onPress={onLogout}>
+        <TouchableOpacity onPress={onLogout} style={styles.headerRight}>
           <MaterialCommunityIcons name='logout' size={24} color='#fff' />
         </TouchableOpacity>
       ),
