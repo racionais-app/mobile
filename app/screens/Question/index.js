@@ -237,13 +237,27 @@ const QuestionView = ({ navigation, route }) => {
       />
       {Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
       <Modal
-        isVisible={visible?.visible}
+        isVisible={visible?.visible && visible?.accepted}
         hideModalContentWhileAnimating
         animationInTiming={0}
         animationOutTiming={0}
       >
         <LottieView
-          source={visible?.accepted ? IMAGES.check : IMAGES.wrong}
+          source={IMAGES.check}
+          autoPlay
+          loop={false}
+          style={styles.animation}
+          onAnimationFinish={animationCallback}
+        />
+      </Modal>
+      <Modal
+        isVisible={visible?.visible && !visible?.accepted}
+        hideModalContentWhileAnimating
+        animationInTiming={0}
+        animationOutTiming={0}
+      >
+        <LottieView
+          source={IMAGES.wrong}
           autoPlay
           loop={false}
           style={styles.animation}
