@@ -1,13 +1,15 @@
 import React, { useRef, useState } from 'react';
-import YoutubePlayer from 'react-native-youtube-iframe';
+import YouTube from 'react-native-youtube';
 import { View, StyleSheet, Text } from 'react-native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
 import Popover from 'react-native-popover-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import analytics from '@react-native-firebase/analytics';
 import DeviceInfo from 'react-native-device-info';
 import ModuleModel from '../../core/Module';
+import YoutubeKey from '../../core/youtube.json';
 
 const styles = StyleSheet.create({
   container: {
@@ -45,6 +47,10 @@ const styles = StyleSheet.create({
   },
   background: {
     backgroundColor: 'transparent'
+  },
+  video: {
+    alignSelf: 'stretch',
+    height: 300
   }
 });
 
@@ -76,12 +82,7 @@ const Item = ({ items, index, item, onPress, step }) => {
 
   const onTouch = async(item) => {
     setShowPopover(false);
-    if (item.type === 'video') {
-      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
-      if (onboardingStepString === '1') {
-        await AsyncStorage.setItem('onboardingStep', '2');
-      }
-    } else {
+    if (item.type !== 'video') {
       const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
       if (onboardingStepString === '2') {
         await AsyncStorage.setItem('onboardingStep', '3');
@@ -154,9 +155,27 @@ const ModuleView = ({ route, navigation }) => {
     });
   }, [navigation]);
 
-  const onStateChange = async(state) => {
+  const onGiveLifes = async() => {
+    const userRef = firestore()
+      .collection('users')
+      .doc(DeviceInfo.getUniqueId());
+
+    const videoIdx = items.findIndex(item => item.type === 'video');
+    await userRef.update({
+      done: firestore.FieldValue.arrayRemove(items[videoIdx].id),
+      lifes: 3
+    });
+
+    setTimeout(() => setPlaying(true), 700);
+  }
+
+  const onStateChange = async({ state }) => {
     if (state === 'ended') {
       setPlaying(false);
+      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+      if (onboardingStepString === '1') {
+        await AsyncStorage.setItem('onboardingStep', '2');
+      }
       const videoIdx = items.findIndex(item => item.type === 'video');
       const newItems = items;
       newItems[videoIdx].completed = true;
@@ -192,26 +211,34 @@ const ModuleView = ({ route, navigation }) => {
     return model.unsubscribe;
   }, []);
 
-  const onPress = (item) => {
+  const onPress = async(item) => {
+    try {
+      await analytics().logEvent('item_view', { itemId: item.id });
+    } catch (e) {
+      // Do nothing
+    }
     if (item.type === 'video') {
       setPlaying(true);
     } else {
       navigation.navigate('QuestionView', {
         itemId: item.id,
         moduleId,
-        title: item.name
+        title: item.name,
+        onGiveLifes
       });
     }
   }
 
   return (
     <View style={styles.container}>
-      <YoutubePlayer
-        ref={playerRef}
-        height={211}
-        play={playing}
+      <YouTube
+        apiKey={YoutubeKey.apiKey}
         videoId={items.find(item => item.type === 'video')?.videoId}
+        play={playing}
+        fullscreen={playing}
         onChangeState={onStateChange}
+        onError={e => console.error(e.error)}
+        style={styles.video}
       />
       <FlatList
         data={items}

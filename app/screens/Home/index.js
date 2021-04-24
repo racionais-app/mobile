@@ -6,6 +6,7 @@ import React, {
 import {
   Text,
   View,
+  Platform,
   FlatList,
   StyleSheet,
   Image
@@ -16,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import ProgressCircle from 'react-native-progress-circle'
 import Popover from 'react-native-popover-view';
+import analytics from '@react-native-firebase/analytics';
 
 import Loading from '../../containers/Loading';
 import { connect } from 'react-redux';
@@ -88,6 +90,9 @@ const styles = StyleSheet.create({
   },
   percentage: {
     fontWeight: 'bold'
+  },
+  headerRight: {
+    marginHorizontal: Platform.OS === 'android' ? 16 : 0
   }
 });
 
@@ -119,12 +124,17 @@ const Module = ({ item, index }) => {
     if (!onboardingStepString) {
       await AsyncStorage.setItem('onboardingStep', '1');
     }
+    try {
+      await analytics().logEvent('module_view', { moduleId: item.id });
+    } catch (e) {
+      // Do nothing
+    }
     navigation.navigate('ModuleView', { moduleId: item.id, title: item.name });
   }
 
   let content = (
     <View style={{ alignItems: 'center' }}>
-      <View style={{ width: 100 }}>
+      <View style={{ width: 128 }}>
         <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
           <ProgressCircle
             percent={percentage}
@@ -196,6 +206,7 @@ const Home = ({ navigation, user, logout }) => {
 
   const onLogout = async () => {
     try {
+      await analytics().logEvent('logout');
       await AsyncStorage.removeItem('authentication');
       await AsyncStorage.removeItem('onboardingStep');
       await AsyncStorage.removeItem('onboarding');
@@ -209,7 +220,7 @@ const Home = ({ navigation, user, logout }) => {
     navigation.setOptions({
       title: `Olá, ${user?.name}`,
       headerRight: () => (
-        <TouchableOpacity onPress={onLogout}>
+        <TouchableOpacity onPress={onLogout} style={styles.headerRight}>
           <MaterialCommunityIcons name='logout' size={24} color='#fff' />
         </TouchableOpacity>
       ),
