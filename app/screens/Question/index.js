@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform, View, Text, Image } from 'react-native';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import firestore from '@react-native-firebase/firestore';
@@ -13,6 +13,7 @@ import Separator from './Components/Separator';
 import Element from './Components/Element';
 import Footer from './Components/Footer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create({
   container: {
@@ -48,6 +49,7 @@ const QuestionView = ({ navigation, route }) => {
 
   const [data, setData] = useState({});
   const [visible, setVisible] = useState({});
+  const [lifesVisible, setLifesVisible] = useState(false);
 
   const [showPopover, setShowPopover] = useState(false);
 
@@ -58,14 +60,14 @@ const QuestionView = ({ navigation, route }) => {
   }, [navigation]);
 
   React.useEffect(() => {
-    (async() => {
+    (async () => {
       const items = await firestore()
-          .collection('modules')
-          .doc(moduleId)
-          .collection('items')
-          .doc(itemId)
-          .collection('questions')
-          .get();
+        .collection('modules')
+        .doc(moduleId)
+        .collection('items')
+        .doc(itemId)
+        .collection('questions')
+        .get();
       setQuestions(items.docs.map(doc => doc.data()));
     })();
   }, []);
@@ -82,17 +84,24 @@ const QuestionView = ({ navigation, route }) => {
 
   const onUserConfirm = (userId, value) => {
     const userReference = firestore().doc(`users/${userId}`);
-  
     return firestore().runTransaction(async transaction => {
       const userSnapshot = await transaction.get(userReference);
-  
+
       if (!userSnapshot.exists) {
         throw 'User does not exist!';
       }
 
-      let newValue = (userSnapshot.data().stars ?? 0) + value;
-      if (newValue < 0) {
-        newValue = 0;
+      let newValue = userSnapshot.data().stars ?? 0;
+      if (value > 0) {
+        newValue += value;
+      }
+
+      let lifes = userSnapshot.data().lifes ?? 0;
+      if (value < 0) {
+        lifes -= 1;
+        if (lifes < 0) {
+          lifes = 0;
+        }
       }
 
       let streak = userSnapshot.data().streak;
@@ -108,16 +117,17 @@ const QuestionView = ({ navigation, route }) => {
       } else {
         streak = 1;
       }
-  
+
       await transaction.update(userReference, {
         stars: newValue,
         streak: streak,
+        lifes: lifes,
         lastAnswer: new Date()
       });
     });
   }
 
-  const onSubmit = async() => {
+  const onSubmit = async () => {
     setShowPopover(false);
     try {
       await analytics().logEvent('answer');
@@ -130,16 +140,29 @@ const QuestionView = ({ navigation, route }) => {
     if (answers.length > 0 && !question.filter(item => item.answer).find(item => data[item.id])) {
       return;
     }
-    
-    const onboardingStep = await AsyncStorage.getItem('onboardingStep');
-    if (onboardingStep === '4') {
-      setTimeout(() => setVisible({ visible: true, accepted }), 500);
+
+    const userRef = firestore()
+      .collection('users')
+      .doc(DeviceInfo.getUniqueId());
+
+    const userData = await userRef.get();
+    const user = userData.data();
+    const lifes = user.lifes ?? 0;
+    const operation = accepted ? 1 : -1;
+
+    if (lifes + operation <= 0) {
+      setLifesVisible(true);
     } else {
-      setVisible({ visible: true, accepted });
-    }
-    const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
-    if (onboardingStepString === '4') {
-      await AsyncStorage.setItem('onboardingStep', '5');
+      const onboardingStep = await AsyncStorage.getItem('onboardingStep');
+      if (onboardingStep === '4') {
+        setTimeout(() => setVisible({ visible: true, accepted }), 500);
+      } else {
+        setVisible({ visible: true, accepted });
+      }
+      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+      if (onboardingStepString === '4') {
+        await AsyncStorage.setItem('onboardingStep', '5');
+      }
     }
 
     try {
@@ -149,14 +172,19 @@ const QuestionView = ({ navigation, route }) => {
     }
   }
 
-  const onContinue = async() => {
+  const onContinue = async () => {
     const onboardingStep = await AsyncStorage.getItem('onboardingStep');
     if (onboardingStep === '4') {
       setShowPopover(true);
     }
   }
 
-  const animationCallback = async() => {
+  const resetLifes = () => {
+    navigation.navigate('ModuleView');
+    route.params?.onGiveLifes?.();
+  }
+
+  const animationCallback = async () => {
     setVisible({});
     if (index < questions.length - 1) {
       navigation.push('QuestionView', {
@@ -221,6 +249,25 @@ const QuestionView = ({ navigation, route }) => {
           style={styles.animation}
           onAnimationFinish={animationCallback}
         />
+      </Modal>
+      <Modal
+        isVisible={lifesVisible}
+        hideModalContentWhileAnimating
+        animationInTiming={0}
+        animationOutTiming={0}
+      >
+        <View style={{ backgroundColor: 'white', padding: 16, borderRadius: 16, alignItems: 'center' }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 16, marginVertical: 8 }}>Parece que você perdeu todas as suas vidas.</Text>
+          <Image
+            source={require('../../resources/hearth.png')}
+            style={{ height: 100, width: 100 }}
+            resizeMode='contain'
+          />
+          <Text style={{ fontWeight: '600', fontSize: 18, marginBottom: 8 }}>Para ganhar mais vidas você deverá assistir ao vídeo do módulo novamente.</Text>
+          <TouchableOpacity onPress={resetLifes} style={{ backgroundColor: '#1C375B', padding: 8, alignItems: 'center', borderRadius: 8 }}>
+            <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 18 }}>Ganhar mais vidas!</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
     </SafeAreaView>
   );

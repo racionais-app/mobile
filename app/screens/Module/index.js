@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import YoutubePlayer from 'react-native-youtube-iframe';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, InteractionManager } from 'react-native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
@@ -77,12 +77,7 @@ const Item = ({ items, index, item, onPress, step }) => {
 
   const onTouch = async(item) => {
     setShowPopover(false);
-    if (item.type === 'video') {
-      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
-      if (onboardingStepString === '1') {
-        await AsyncStorage.setItem('onboardingStep', '2');
-      }
-    } else {
+    if (item.type !== 'video') {
       const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
       if (onboardingStepString === '2') {
         await AsyncStorage.setItem('onboardingStep', '3');
@@ -155,9 +150,27 @@ const ModuleView = ({ route, navigation }) => {
     });
   }, [navigation]);
 
+  const onGiveLifes = async() => {
+    const userRef = firestore()
+      .collection('users')
+      .doc(DeviceInfo.getUniqueId());
+
+    const videoIdx = items.findIndex(item => item.type === 'video');
+    await userRef.update({
+      done: firestore.FieldValue.arrayRemove(items[videoIdx].id),
+      lifes: 3
+    });
+
+    setTimeout(() => setPlaying(true), 700);
+  }
+
   const onStateChange = async(state) => {
     if (state === 'ended') {
       setPlaying(false);
+      const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
+      if (onboardingStepString === '1') {
+        await AsyncStorage.setItem('onboardingStep', '2');
+      }
       const videoIdx = items.findIndex(item => item.type === 'video');
       const newItems = items;
       newItems[videoIdx].completed = true;
@@ -205,7 +218,8 @@ const ModuleView = ({ route, navigation }) => {
       navigation.navigate('QuestionView', {
         itemId: item.id,
         moduleId,
-        title: item.name
+        title: item.name,
+        onGiveLifes
       });
     }
   }
