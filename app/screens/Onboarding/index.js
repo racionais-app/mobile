@@ -48,7 +48,7 @@ const OnboardingView = ({ login }) => {
           backgroundColor: '#fff',
           image: <MaterialCommunityIcons name='calendar-month' size={240} color='#FEA55B' />,
           title: 'Diário',
-          subtitle: 'A cada dia consecutivo de estudos você terá um ...',
+          subtitle: 'A cada dia consecutivo de estudos o seu número de acessos consecutivos aumentará e você poderá receber bônus de estrelas.',
         },
         {
           backgroundColor: '#fff',

@@ -75,7 +75,7 @@ const LoginView = ({ onboarding }) => {
     try {
       const id = DeviceInfo.getUniqueId();
       await AsyncStorage.setItem('authentication', name);
-      await firestore().collection('users').doc(id).set({ name });
+      await firestore().collection('users').doc(id).set({ name, lifes: 3 });
       await analytics().logEvent('login');
     } catch (e) {
       // Do nothing
