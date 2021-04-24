@@ -49,3 +49,4 @@ buck-out/
 # ENV
 GoogleService-Info.plist
 google-services.json
+youtube.json

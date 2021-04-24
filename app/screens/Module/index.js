@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import YoutubePlayer from 'react-native-youtube-iframe';
-import { View, StyleSheet, Text, InteractionManager } from 'react-native';
+import YouTube from 'react-native-youtube';
+import { View, StyleSheet, Text } from 'react-native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import analytics from '@react-native-firebase/analytics';
 import DeviceInfo from 'react-native-device-info';
 import ModuleModel from '../../core/Module';
+import YoutubeKey from '../../core/youtube.json';
 
 const styles = StyleSheet.create({
   container: {
@@ -46,6 +47,10 @@ const styles = StyleSheet.create({
   },
   background: {
     backgroundColor: 'transparent'
+  },
+  video: {
+    alignSelf: 'stretch',
+    height: 300
   }
 });
 
@@ -164,7 +169,7 @@ const ModuleView = ({ route, navigation }) => {
     setTimeout(() => setPlaying(true), 700);
   }
 
-  const onStateChange = async(state) => {
+  const onStateChange = async({ state }) => {
     if (state === 'ended') {
       setPlaying(false);
       const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
@@ -226,12 +231,14 @@ const ModuleView = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <YoutubePlayer
-        ref={playerRef}
-        height={211}
-        play={playing}
+      <YouTube
+        apiKey={YoutubeKey.apiKey}
         videoId={items.find(item => item.type === 'video')?.videoId}
+        play={playing}
+        fullscreen={playing}
         onChangeState={onStateChange}
+        onError={e => console.error(e.error)}
+        style={styles.video}
       />
       <FlatList
         data={items}
