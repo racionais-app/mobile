@@ -6,6 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import firestore from '@react-native-firebase/firestore';
 import Popover from 'react-native-popover-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import analytics from '@react-native-firebase/analytics';
 import DeviceInfo from 'react-native-device-info';
 import ModuleModel from '../../core/Module';
 
@@ -192,7 +193,12 @@ const ModuleView = ({ route, navigation }) => {
     return model.unsubscribe;
   }, []);
 
-  const onPress = (item) => {
+  const onPress = async(item) => {
+    try {
+      await analytics().logEvent('item_view', { itemId: item.id });
+    } catch (e) {
+      // Do nothing
+    }
     if (item.type === 'video') {
       setPlaying(true);
     } else {

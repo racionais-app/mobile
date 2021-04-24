@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import ProgressCircle from 'react-native-progress-circle'
 import Popover from 'react-native-popover-view';
+import analytics from '@react-native-firebase/analytics';
 
 import Loading from '../../containers/Loading';
 import { connect } from 'react-redux';
@@ -123,6 +124,11 @@ const Module = ({ item, index }) => {
     if (!onboardingStepString) {
       await AsyncStorage.setItem('onboardingStep', '1');
     }
+    try {
+      await analytics().logEvent('module_view', { moduleId: item.id });
+    } catch (e) {
+      // Do nothing
+    }
     navigation.navigate('ModuleView', { moduleId: item.id, title: item.name });
   }
 
@@ -200,6 +206,7 @@ const Home = ({ navigation, user, logout }) => {
 
   const onLogout = async () => {
     try {
+      await analytics().logEvent('logout');
       await AsyncStorage.removeItem('authentication');
       await AsyncStorage.removeItem('onboardingStep');
       await AsyncStorage.removeItem('onboarding');

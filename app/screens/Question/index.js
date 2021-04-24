@@ -6,6 +6,7 @@ import firestore from '@react-native-firebase/firestore';
 import LottieView from 'lottie-react-native';
 import Modal from 'react-native-modal';
 import DeviceInfo from 'react-native-device-info';
+import analytics from '@react-native-firebase/analytics';
 import isEqual from 'lodash/isEqual';
 
 import Separator from './Components/Separator';
@@ -118,18 +119,23 @@ const QuestionView = ({ navigation, route }) => {
 
   const onSubmit = async() => {
     setShowPopover(false);
+    try {
+      await analytics().logEvent('answer');
+    } catch (e) {
+      // Do nothing
+    }
     const answers = question.filter(item => item.answer);
     const accepted = answers.filter(item => !isEqual(item.answer, data[item.id])).length === 0;
 
-    if (!question.filter(item => item.answer).find(item => data[item.id])) {
+    if (answers.length > 0 && !question.filter(item => item.answer).find(item => data[item.id])) {
       return;
     }
     
     const onboardingStep = await AsyncStorage.getItem('onboardingStep');
     if (onboardingStep === '4') {
-      setTimeout(() => setVisible({ accepted }), 500);
+      setTimeout(() => setVisible({ visible: true, accepted }), 500);
     } else {
-      setVisible({ accepted });
+      setVisible({ visible: true, accepted });
     }
     const onboardingStepString = await AsyncStorage.getItem('onboardingStep');
     if (onboardingStepString === '4') {
@@ -199,11 +205,11 @@ const QuestionView = ({ navigation, route }) => {
         showPopover={showPopover}
         text={index === questions.length - 1 ? 'Finalizar' : 'Continuar'}
         onSubmit={onSubmit}
-        disabled={!question.filter(item => item.answer).find(item => data[item.id])}
+        disabled={question.filter(item => item.answer).length > 0 && !question.filter(item => item.answer).find(item => data[item.id])}
       />
       {Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
       <Modal
-        isVisible={visible?.accepted}
+        isVisible={visible?.visible}
         hideModalContentWhileAnimating
         animationInTiming={0}
         animationOutTiming={0}
