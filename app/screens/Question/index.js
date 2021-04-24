@@ -233,6 +233,7 @@ const QuestionView = ({ navigation, route }) => {
         contentContainerStyle={styles.contentContainerStyle}
         style={styles.content}
         enableAutomaticScroll={false}
+        removeClippedSubviews={false}
       />
       <Footer
         showPopover={showPopover}
