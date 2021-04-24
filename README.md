@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img alt="Racionais" src="https://i.imgur.com/BxPxeON.png" />
+    <img alt="Racionais" src="https://i.imgur.com/OuR6GgO.png" width="300" height="300" />
     <br>
     Racionais
 </h1>
@@ -63,3 +63,11 @@ $ react-native run-android
 
 ## :memo: License
 This project is under the MIT license. See the [LICENSE](https://github.com/racionais-app/mobile/blob/develop/LICENSE) for more information.
+
+---
+
+[nodejs]: https://nodejs.org/
+[yarn]: https://yarnpkg.com/
+[vc]: https://code.visualstudio.com/
+[vceditconfig]: https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig
+[vceslint]: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
