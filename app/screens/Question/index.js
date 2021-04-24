@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Platform, View, Text, Image } from 'react-native';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  View,
+  Text
+} from 'react-native';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
-import KeyboardSpacer from 'react-native-keyboard-spacer';
 import firestore from '@react-native-firebase/firestore';
 import LottieView from 'lottie-react-native';
 import Modal from 'react-native-modal';
@@ -235,7 +240,6 @@ const QuestionView = ({ navigation, route }) => {
         onSubmit={onSubmit}
         disabled={question.filter(item => item.answer).length > 0 && !question.filter(item => item.answer).find(item => data[item.id])}
       />
-      {Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
       <Modal
         isVisible={visible?.visible && visible?.accepted}
         hideModalContentWhileAnimating

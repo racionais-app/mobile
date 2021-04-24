@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   disabled: {
-    backgroundColor: '#E6E6E6'
+    backgroundColor: Platform.OS === 'ios' ? '#E6E6E6' : '#D4D4D4'
   }
 });
 

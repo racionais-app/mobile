@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createNativeStackNavigator } from 'react-native-screens/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { enableScreens } from 'react-native-screens';
+// import { enableScreens } from 'react-native-screens';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -13,9 +13,8 @@ import LoginView from './screens/Login';
 import QuestionView from './screens/Question';
 import ModuleView from './screens/Module';
 import OnboardingView from './screens/Onboarding';
-// import SettingsView from './screens/Settings';
 
-enableScreens();
+// enableScreens();
 
 const ROOT = {
 	OUTSIDE: 'OUTSIDE',
@@ -74,6 +73,10 @@ const HomeStack = () => (
 				headerBackTitle: ''
 			}}
 		/>
+		<Home.Screen
+			name='QuestionView'
+			component={QuestionView}
+		/>
 	</Home.Navigator>
 );
 
@@ -95,16 +98,6 @@ const AppStack = () => (
 		<App.Screen
 			name='Home'
 			component={HomeStack}
-		/>
-		<App.Screen
-			name='QuestionView'
-			component={QuestionView}
-			options={{
-				gestureEnabled: false,
-				headerShown: true,
-				headerBackTitleVisible: false,
-				...defaultScreenOptions
-			}}
 		/>
 	</App.Navigator>
 );
