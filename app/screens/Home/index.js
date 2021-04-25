@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 12,
     fontWeight: 'bold',
+    textAlign: 'center',
     color: '#1C375B'
   },
   image: {
@@ -149,7 +150,7 @@ const Module = ({ item, index }) => {
           <Text style={styles.text}>{item.name}</Text>
         </TouchableOpacity>
         <View style={styles.percent}>
-          <Text style={styles.percentage}>{`${percentage}%`}</Text>
+          <Text style={styles.percentage}>{`${parseInt(percentage, 10)}%`}</Text>
         </View>
       </View>
     </View>
@@ -187,6 +188,7 @@ const Home = ({ navigation, user, logout }) => {
       try {
         const remoteModules = await firestore()
           .collection('modules')
+          .orderBy('order', 'asc')
           .get();
 
         const data = remoteModules
@@ -235,7 +237,7 @@ const Home = ({ navigation, user, logout }) => {
         renderItem={({ item, index }) => <Module index={index} item={item} />}
         keyExtractor={item => item.name}
         contentContainerStyle={styles.container}
-        horizontal={false}
+        // horizontal={false}
       />
       <Loading
         visible={loading}

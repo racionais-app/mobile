@@ -197,15 +197,7 @@ const ModuleView = ({ route, navigation }) => {
 
   React.useEffect(() => {
     let model = new ModuleModel(moduleId, (data) => {
-      let items = data;
-
-      items = items
-        .map(item => ({ ...item, order: item.type === 'video' ? 0 : 1 }));
-
-      items = items
-        .sort(compare);
-      
-      setItems(items);
+      setItems(data);
     });
 
     return model.unsubscribe;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
+  TouchableOpacity,
   Image,
   View,
   Text
@@ -18,7 +19,6 @@ import Separator from './Components/Separator';
 import Element from './Components/Element';
 import Footer from './Components/Footer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create({
   container: {
