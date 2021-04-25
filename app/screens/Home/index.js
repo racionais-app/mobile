@@ -9,9 +9,9 @@ import {
   Platform,
   FlatList,
   StyleSheet,
+  TouchableOpacity,
   Image
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F5'
   },
   container: {
-    flex: 1,
+    // flex: 1,
     marginTop: 16,
     padding: 16,
     borderTopWidth: 2,
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 12,
     fontWeight: 'bold',
+    textAlign: 'center',
     color: '#1C375B'
   },
   image: {
@@ -111,6 +112,10 @@ const Module = ({ item, index }) => {
     })();
 
     let model = new ModuleModel(item.id, (data) => {
+      if (!data.length) {
+        setPercentage(0);
+        return;
+      }
       const percent = data.filter(i => i.completed).length / data.length;
       setPercentage(percent * 100);
     });
@@ -135,7 +140,7 @@ const Module = ({ item, index }) => {
   let content = (
     <View style={{ alignItems: 'center' }}>
       <View style={{ width: 128 }}>
-        <TouchableOpacity ref={touchable} onPress={onPress} style={styles.button}>
+        <View ref={touchable} onPress={onPress} style={styles.button}>
           <ProgressCircle
             percent={percentage}
             radius={64}
@@ -147,9 +152,9 @@ const Module = ({ item, index }) => {
             <Image source={require('../../resources/module.png')} style={styles.image} />
           </ProgressCircle>
           <Text style={styles.text}>{item.name}</Text>
-        </TouchableOpacity>
+        </View>
         <View style={styles.percent}>
-          <Text style={styles.percentage}>{`${percentage}%`}</Text>
+          <Text style={styles.percentage}>{`${parseInt(percentage, 10)}%`}</Text>
         </View>
       </View>
     </View>
@@ -187,6 +192,7 @@ const Home = ({ navigation, user, logout }) => {
       try {
         const remoteModules = await firestore()
           .collection('modules')
+          .orderBy('order', 'asc')
           .get();
 
         const data = remoteModules
@@ -235,7 +241,7 @@ const Home = ({ navigation, user, logout }) => {
         renderItem={({ item, index }) => <Module index={index} item={item} />}
         keyExtractor={item => item.name}
         contentContainerStyle={styles.container}
-        horizontal={false}
+        // horizontal={false}
       />
       <Loading
         visible={loading}

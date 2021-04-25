@@ -19,6 +19,7 @@ class Module {
       .collection('modules')
       .doc(mid)
       .collection('items')
+      .orderBy('order', 'asc')
       .onSnapshot(documentSnapshot => {
         this.onSnapshotItems(transform(documentSnapshot));
       });

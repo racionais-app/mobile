@@ -58,12 +58,14 @@ const Fraction = ({ element, onChange }) => {
           onChangeText={text => onChangeText('numerator', text)}
           onEndEditing={onSubmit}
           onSubmitEditing={onSubmit}
+          keyboardType='numeric'
         />
         <View style={styles.separator} />
         <TextInput
           ref={denominator}
           style={styles.textInput}
           onChangeText={text => onChangeText('denominator', text)}
+          keyboardType='numeric'
         />
       </View>
     </>
